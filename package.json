@@ -1,0 +1,14 @@
+{
+  "name": "youcancode",
+  "version": "0.0.1",
+  "description": "We Can Code",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "MobileAcademy",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
