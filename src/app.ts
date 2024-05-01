@@ -1,9 +1,8 @@
-import express from "express";
+import express, { Request, Response } from "express";
+import userRouter from "./routes/user-routes";
 
 const app = express();
 
-app.get("/", (req, res) => {
-    res.send("Hello From YouCanCode! ....");
-})
+app.use('/api/v1/user', userRouter);
 
 export default app;

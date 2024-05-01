@@ -1,3 +1,5 @@
+## File naming convention
+* kebab-case
 
 ### Commands To Install Packages
 * npm i express
