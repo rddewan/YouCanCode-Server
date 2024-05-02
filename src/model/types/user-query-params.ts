@@ -1,4 +1,4 @@
 
-export interface IUserQueryParams {
+export type UserQueryParams = {
     id?: string;
 }
