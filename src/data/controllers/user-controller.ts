@@ -6,11 +6,16 @@ import { UserReponse } from '../../model/types/user-response';
 
 
 export const me = async (req: Request, res: Response) => {
- 
+    if(req.user) {
+        const userID = req.user.id;
+    }
     res.status(200).send("Hello from user controller");
 }
 
 export const create = async (req: Request<{},{}, IUserDto>, res: Response) => {
+    if(req.user) {
+        const userID = req.user.id;
+    }
      
     res.status(200).send("Hello from user controller");
 }
