@@ -1,5 +1,3 @@
-
-
 export type UserRouteParams = {
-    id?: string
-}
+  id?: string;
+};

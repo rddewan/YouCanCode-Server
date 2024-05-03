@@ -1,4 +1,3 @@
-
 export type UserQueryParams = {
-    id?: string;
-}
+  id?: string;
+};

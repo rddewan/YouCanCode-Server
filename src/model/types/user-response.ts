@@ -1,6 +1,4 @@
-
-
 export type UserReponse = {
-    status: string,
-    data?: {}
-}
+  status: string;
+  data?: {};
+};
