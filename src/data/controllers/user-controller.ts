@@ -5,31 +5,31 @@ import { UserRouteParams } from "../../model/types/user-route-params";
 import { UserReponse } from "../../model/types/user-response";
 
 export const me = async (req: Request, res: Response) => {
-  if (req.user) {
-    const userID = req.user.id;
-  }
-  res.status(200).send("Hello from user controller");
+	if (req.user) {
+		const userID = req.user.id;
+	}
+	res.status(200).send("Hello from user controller");
 };
 
 export const create = async (req: Request<{}, {}, IUserDto>, res: Response) => {
-  if (req.user) {
-    const userID = req.user.id;
-  }
+	if (req.user) {
+		const userID = req.user.id;
+	}
 
-  res.status(200).send("Hello from user controller");
+	res.status(200).send("Hello from user controller");
 };
 
 export const getUserById = async (
-  req: Request<UserRouteParams, {}, {}, UserQueryParams>,
-  res: Response<UserReponse>,
+	req: Request<UserRouteParams, {}, {}, UserQueryParams>,
+	res: Response<UserReponse>,
 ) => {
-  const routeParamsId = req.params.id;
-  const userId = req.query.id;
+	const routeParamsId = req.params.id;
+	const userId = req.query.id;
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      id: userId || routeParamsId,
-    },
-  });
+	res.status(200).json({
+		status: "success",
+		data: {
+			id: userId || routeParamsId,
+		},
+	});
 };

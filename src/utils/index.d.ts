@@ -16,13 +16,13 @@ import { Express, Request } from "express";
  * This user object has properties id, email, and name, all of type string.
  */
 declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email: string;
-        name: string;
-      };
-    }
-  }
+	namespace Express {
+		interface Request {
+			user?: {
+				id: string;
+				email: string;
+				name: string;
+			};
+		}
+	}
 }
