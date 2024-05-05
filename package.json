@@ -7,7 +7,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "tsc",
 		"dev": "nodemon ./src/server.ts",
-		"format": "prettier --write ./src/**/*",
+		"format": "prettier --write .",
 		"prepare": "husky install"
 	},
 	"author": "MobileAcademy",
@@ -25,6 +25,6 @@
 		"typescript": "^5.4.5"
 	},
 	"lint-staged": {
-		"*./src/**/*": "prettier --write"
+		"*.*": "prettier --ignore-unknown --write"
 	}
 }
