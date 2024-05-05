@@ -11,6 +11,7 @@
 -   npm i -D @types/ts-node
 -   npm i --save-dev --save-exact prettier
 -   node --eval "fs.writeFileSync('.prettierrc','{}\n')"
+-   npm install --save-dev eslint @eslint/js typescript typescript-eslint
 
 ### Setup and configure TypeScript
 
