@@ -31,6 +31,6 @@
 	},
 	"lint-staged": {
 		"*.*": "prettier --ignore-unknown --write",
-		"*.ts": "eslint"
+		"*.ts": "npm run lint"
 	}
 }
