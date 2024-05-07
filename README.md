@@ -13,6 +13,7 @@
 -   node --eval "fs.writeFileSync('.prettierrc','{}\n')"
 -   npm install --save-dev eslint @eslint/js typescript typescript-eslint
 -   npm i dotenv
+-   npm i -D @types/node
 
 ### Setup and configure TypeScript
 
