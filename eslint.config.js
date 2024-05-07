@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
 	eslint.configs.recommended,
-	...tseslint.configs.recommended,
+	...tseslint.configs.recommendedTypeChecked,
 	{
 		ignores: ["**/node_modules/**", "**/dist/**"],
 	},
@@ -15,6 +15,14 @@ export default tseslint.config(
 			"no-unused-vars": "off",
 			"@typescript-eslint/no-unused-vars": "error",
 			"@typescript-eslint/ban-types": "error",
+		},
+	},
+	{
+		languageOptions: {
+			parserOptions: {
+				project: true,
+				tsconfigRootDir: import.meta.dirname,
+			},
 		},
 	},
 );
