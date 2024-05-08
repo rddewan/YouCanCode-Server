@@ -1,4 +1,5 @@
 export type UserReponse = {
 	status: string;
-	data?: {};
+	message?: unknown;
+	data?: object;
 };

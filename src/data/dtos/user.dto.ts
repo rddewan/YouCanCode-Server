@@ -2,7 +2,7 @@ export interface IUserDto {
 	name: string;
 	email: string;
 	password: string;
-	passwordConfirmation: string;
+	passwordConfirm: string;
 	role?: string;
 	authType?: string;
 }
