@@ -14,6 +14,8 @@
 -   npm install --save-dev eslint @eslint/js typescript typescript-eslint
 -   npm i dotenv
 -   npm i -D @types/node
+-   npm i mongodb
+-   npm i mongoose
 
 ### Setup and configure TypeScript
 
