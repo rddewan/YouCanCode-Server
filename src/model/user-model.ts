@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export enum AuthType {
 	email = "email",
@@ -26,6 +27,7 @@ export interface IUser extends mongoose.Document {
 	emailVerified: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	createVerifyEmailToken: () => string;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -111,6 +113,22 @@ userSchema.pre("save", async function (next) {
 	// next middleware
 	next();
 });
+
+userSchema.methods.createVerifyEmailToken = function (): string {
+	// generate a token 32 bytes. It is then converted to a hexadecimal string
+	const token = crypto.randomBytes(32).toString("hex");
+	// store the token in the database
+	// encrypt the token witht he SHA-256 hashing algorithm
+	this.verifyEmailToken = crypto
+		.createHash("sha256")
+		.update(token)
+		.digest("hex");
+	// set the expires time to 1 day or 24 hrs
+	// verify token will expire in 24 hrs
+	this.verifyEmailExpires = Date.now() + 60 * 60 * 1000 * 24;
+	// return the token
+	return token;
+};
 
 const User = mongoose.model<IUser>("User", userSchema, "users");
 

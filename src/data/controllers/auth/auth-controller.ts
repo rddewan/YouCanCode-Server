@@ -17,6 +17,8 @@ export const signup = async (
 			passwordConfirm,
 			authType: AuthType.email,
 		});
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const verifyEmailToken = newUser.createVerifyEmailToken();
 
 		res.status(201).json({
 			status: "success",
