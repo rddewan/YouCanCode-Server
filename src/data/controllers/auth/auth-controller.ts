@@ -3,13 +3,6 @@ import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
 
-/**
- * Creates a new user account.
- *
- * @param {Request<Record<string, unknown>, Record<string, unknown>, IUserDto>} req - The request object containing the user data.
- * @param {Response<UserReponse>} res - The response object to send the result.
- * @return {Promise<void>} - A promise that resolves when the user account is created successfully.
- */
 export const signup = async (
 	req: Request<Record<string, unknown>, Record<string, unknown>, IUserDto>,
 	res: Response<UserReponse>,
@@ -25,8 +18,6 @@ export const signup = async (
 			authType: AuthType.email,
 		});
 
-		await newUser.save({ validateBeforeSave: false });
-
 		res.status(201).json({
 			status: "success",
 			data: {
@@ -40,7 +31,7 @@ export const signup = async (
 			},
 		});
 	} catch (error) {
-		res.status(500).json({
+		res.status(400).json({
 			status: "fail",
 			message: error,
 		});
