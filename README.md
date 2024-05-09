@@ -16,6 +16,8 @@
 -   npm i -D @types/node
 -   npm i mongodb
 -   npm i mongoose
+-   npm i bcryptjs
+-   npm i --save-dev @types/bcryptjs
 
 ### Setup and configure TypeScript
 

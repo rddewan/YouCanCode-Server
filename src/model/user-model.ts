@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 export enum AuthType {
 	email = "email",
@@ -13,7 +14,7 @@ export interface IUser extends mongoose.Document {
 	photoUrl: string;
 	role: string;
 	password: string;
-	passwordConfirm: string;
+	passwordConfirm?: string;
 	passwordChangedAt?: Date;
 	passwordResetToken?: string;
 	passwordResetExpires?: Date;
@@ -96,6 +97,20 @@ const userSchema = new mongoose.Schema<IUser>(
 		timestamps: true,
 	},
 );
+
+// pre hook middleware - run before save and create
+// function to encrypt the password
+userSchema.pre("save", async function (next) {
+	// only run this function if the password was actually modified
+	if (!this.isModified("password")) return next();
+	if (!this.password) return next();
+	// hash the password witht eh salt of 12
+	this.password = await bcrypt.hash(this.password, 12);
+	// delete the passwordConfirm field
+	this.passwordConfirm = undefined;
+	// next middleware
+	next();
+});
 
 const User = mongoose.model<IUser>("User", userSchema, "users");
 
