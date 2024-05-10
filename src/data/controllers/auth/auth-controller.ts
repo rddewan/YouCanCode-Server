@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
+import Email from "../../../utils/email";
 
 export const signup = async (
 	req: Request<Record<string, unknown>, Record<string, unknown>, IUserDto>,
@@ -17,8 +18,12 @@ export const signup = async (
 			passwordConfirm,
 			authType: AuthType.email,
 		});
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 		const verifyEmailToken = newUser.createVerifyEmailToken();
+		// create a url
+		const url = `${req.protocol}://${req.get("hotst")}/api/v1/auth/verifyEmail/${verifyEmailToken}`;
+		// send the veriify email
+		await new Email(newUser, url, "24 hours").sendVerifyEmail();
 
 		res.status(201).json({
 			status: "success",
