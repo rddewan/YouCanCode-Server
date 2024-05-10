@@ -4,10 +4,10 @@ import User, { AuthType } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
 import Email from "../../../utils/email";
 
-export const signup = async (
+export async function signup(
 	req: Request<Record<string, unknown>, Record<string, unknown>, IUserDto>,
 	res: Response<UserReponse>,
-): Promise<void> => {
+): Promise<void> {
 	try {
 		const { name, email, password, passwordConfirm } = req.body;
 
@@ -43,4 +43,4 @@ export const signup = async (
 			message: error,
 		});
 	}
-};
+}
