@@ -58,7 +58,6 @@ export default class Email {
 			{
 				firstName: this.firstName,
 				url: this.url,
-				subject: this.subject,
 				expiresIn: this.expiresIn,
 			},
 			{
