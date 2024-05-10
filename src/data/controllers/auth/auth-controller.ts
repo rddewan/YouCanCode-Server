@@ -20,10 +20,14 @@ export async function signup(
 		});
 
 		const verifyEmailToken = newUser.createVerifyEmailToken();
-		// create a url
-		const url = `${req.protocol}://${req.get("hotst")}/api/v1/auth/verifyEmail/${verifyEmailToken}`;
-		// send the veriify email
-		await new Email(newUser, url, "24 hours").sendVerifyEmail();
+		// protocol is http or https
+		const protocol = req.protocol;
+		// host is localhost:3000 - mobileacademy.io
+		const host = req.get("host");
+		// create a verify email url
+		const verifyEmailUrl = `${protocol}://${host}/api/v1/auth/verify-email/${verifyEmailToken}`;
+		// send the verify email
+		await new Email(newUser, verifyEmailUrl, " 24 hours").sendVerifyEmail();
 
 		res.status(201).json({
 			status: "success",
