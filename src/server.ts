@@ -1,5 +1,6 @@
 import app from "./app";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -12,6 +13,21 @@ const envFile = path.join(__dirname, `./../.env.${currentEnv}`);
 
 // env variables
 dotenv.config({ path: envFile });
+
+const DB: string = process.env.MONGO_DB?.replace(
+	"<PASSWORD>",
+	process.env.MONGO_DB_PASSWORD || "",
+) as string;
+mongoose
+	.connect(DB)
+	.then(() => {
+		// eslint-disable-next-line no-console
+		console.log(`MongoDB connected successfully`);
+	})
+	.catch((err) => {
+		// eslint-disable-next-line no-console
+		console.log(err);
+	});
 
 const PORT = parseInt(process.env.PORT || "3000");
 app.listen(PORT, "0.0.0.0", () => {
