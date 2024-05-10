@@ -18,6 +18,8 @@
 -   npm i mongoose
 -   npm i bcryptjs
 -   npm i --save-dev @types/bcryptjs
+-   npm i nodemailer nodemailer-sendgrid ejs
+-   npm i -D @types/nodemailer @types/nodemailer-sendgrid @types/ejs
 
 ### Setup and configure TypeScript
 
