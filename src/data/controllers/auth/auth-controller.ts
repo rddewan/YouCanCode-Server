@@ -79,6 +79,11 @@ export const verifyEmail = async (
 		// send the verify email
 		await new Email(user, welcomeEmailUrl).sendWelcomeEmail();
 
+		// update the user - emailVerified = true
+		user.emailVerified = true;
+		// save the user - disable the validateBeforeSave option
+		await user.save({ validateBeforeSave: false });
+
 		res.status(200).json({
 			status: "success",
 			data: {
