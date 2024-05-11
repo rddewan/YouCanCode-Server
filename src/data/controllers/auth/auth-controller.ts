@@ -3,6 +3,7 @@ import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
 import Email from "../../../utils/email";
+import crypto from "crypto";
 
 export async function signup(
 	req: Request<Record<string, unknown>, Record<string, unknown>, IUserDto>,
@@ -48,3 +49,44 @@ export async function signup(
 		});
 	}
 }
+
+// verify email
+export const verifyEmail = async (
+	req: Request,
+	res: Response,
+): Promise<void> => {
+	try {
+		const token = crypto
+			.createHash("sha256")
+			.update(req.params.token)
+			.digest("hex");
+		const user = await User.findOne({
+			verifyEmailToken: token,
+			verifyEmailExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			throw new Error("Token is invalid or has expired");
+		}
+
+		// send the welcome email -- TODO: send a welcome email
+
+		res.status(200).json({
+			status: "success",
+			data: {
+				user: {
+					id: user._id as string,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+					authType: user.authType,
+				},
+			},
+		});
+	} catch (error) {
+		res.status(400).json({
+			status: "fail",
+			message: error,
+		});
+	}
+};
