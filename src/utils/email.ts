@@ -80,7 +80,7 @@ export default class Email {
 	}
 
 	async sendWelcomeEmail() {
-		await this.send("verifyEmail", "YouCanCode: Verify your email address");
+		await this.send("welcome", "YouCanCode: Welcome to YouCanCode");
 	}
 
 	async sendPasswordResetEmail() {

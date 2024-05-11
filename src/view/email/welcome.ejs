@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Template</title>
+    <title>Welcome</title>
     <%- await include('styles.ejs') %>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Verify Your Email</h1>
+            <h1>Welcome <%= firstName %>!</h1>
         </div>
 
         <div class="body">
 
             <p>Hi <%= firstName %></p>
 
-            <p>Please verify your email address by clicking the button below. The link will expires in <%= expiresIn %></p>
+            <p>Welcome to YouCanCode, we are glad to have you.</p>
 
-            <a href="<%= url %>" class="button" target="_blank">Verify Email</a>
+            <a href="<%= url %>" class="button" target="_blank">Update You Profile</a>
 
             <p>If the above button does not work, please copy and paste the following link in your browser</p>
 
