@@ -20,6 +20,8 @@
 -   npm i --save-dev @types/bcryptjs
 -   npm i nodemailer nodemailer-sendgrid ejs
 -   npm i -D @types/nodemailer @types/nodemailer-sendgrid @types/ejs
+-   npm i validator
+-   npm i --save-dev @types/validator
 
 ### Setup and configure TypeScript
 

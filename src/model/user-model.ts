@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import validator from "validator";
 
 export enum AuthType {
 	email = "email",
@@ -44,6 +45,7 @@ const userSchema = new mongoose.Schema<IUser>(
 			required: [true, "Please add an email"],
 			unique: true,
 			lowercase: true,
+			validate: [validator.isEmail, "Please provide a valid email"],
 		},
 		phoneNumber: {
 			type: String,
