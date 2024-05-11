@@ -21,6 +21,8 @@ export async function signup(
 		});
 
 		const verifyEmailToken = newUser.createVerifyEmailToken();
+		// save the user - we have updated the user model - verifyEmailToken/verifyEmailExpires
+		await newUser.save({ validateBeforeSave: false });
 		// protocol is http or https
 		const protocol = req.protocol;
 		// host is localhost:3000 - mobileacademy.io
