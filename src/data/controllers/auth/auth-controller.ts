@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { IUserDto } from "../../dtos/user.dto";
-import User, { AuthType } from "../../../model/user-model";
+import User, { AuthType, IUser } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
 import Email from "../../../utils/email";
 import crypto from "crypto";
@@ -60,7 +60,8 @@ export const verifyEmail = async (
 			.createHash("sha256")
 			.update(req.params.token)
 			.digest("hex");
-		const user = await User.findOne({
+
+		const user: IUser | null = await User.findOne({
 			verifyEmailToken: token,
 			verifyEmailExpires: { $gt: Date.now() },
 		});
@@ -69,7 +70,14 @@ export const verifyEmail = async (
 			throw new Error("Token is invalid or has expired");
 		}
 
-		// send the welcome email -- TODO: send a welcome email
+		// protocol is http or https
+		const protocol = req.protocol;
+		// host is localhost:3000 - mobileacademy.io
+		const host = req.get("host");
+		// create a verify email url
+		const welcomeEmailUrl = `${protocol}://${host}/me`;
+		// send the verify email
+		await new Email(user, welcomeEmailUrl).sendWelcomeEmail();
 
 		res.status(200).json({
 			status: "success",
