@@ -4,10 +4,10 @@ class AppError extends Error {
 	public isOperational: boolean;
 
 	/**
-	 * Constructor for creating a new Error instance.
+	 * Creates a new instance of the AppError class.
 	 *
-	 * @param {string} message - the error message
-	 * @param {number} statusCode - the status code of the error
+	 * @param {string} message - The error message.
+	 * @param {number} statusCode - The HTTP status code associated with the error.
 	 */
 	constructor(message: string, statusCode: number) {
 		super(message);

@@ -1,8 +1,8 @@
-import express, { NextFunction, Request } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import userRouter from "./route/user-routes";
 import authRouter from "./route/auth-routes";
-import { globalErrorHandler } from "./utils/global-error-handler";
 import AppError from "./utils/app-error";
+import globalErrorHandler from "./utils/global-error-handler";
 
 const app = express();
 
@@ -17,7 +17,7 @@ app.use("/api/v1/user", userRouter);
  * This middleware function is used to handle 404 errors,
  * i.e., when a route is requested that does not exist on the server.
  */
-app.all("*", (req: Request, _, next: NextFunction) => {
+app.all("*", (req: Request, res: Response, next: NextFunction) => {
 	next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
