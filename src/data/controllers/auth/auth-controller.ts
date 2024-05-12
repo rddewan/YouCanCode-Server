@@ -4,12 +4,17 @@ import User, { AuthType, IUser } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
 import Email from "../../../utils/email";
 import crypto from "crypto";
+import catchAsync from "../../../utils/catch-async";
 
-export async function signup(
-	req: Request<Record<string, unknown>, Record<string, unknown>, IUserDto>,
-	res: Response<UserReponse>,
-): Promise<void> {
-	try {
+export const signup = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IUserDto
+		>,
+		res: Response<UserReponse>,
+	): Promise<void> => {
 		const { name, email, password, passwordConfirm } = req.body;
 
 		const newUser = await User.create({
@@ -44,20 +49,12 @@ export async function signup(
 				},
 			},
 		});
-	} catch (error) {
-		res.status(400).json({
-			status: "fail",
-			message: error,
-		});
-	}
-}
+	},
+);
 
 // verify email
-export const verifyEmail = async (
-	req: Request,
-	res: Response,
-): Promise<void> => {
-	try {
+export const verifyEmail = catchAsync(
+	async (req: Request, res: Response): Promise<void> => {
 		const token = crypto
 			.createHash("sha256")
 			.update(req.params.token)
@@ -98,10 +95,5 @@ export const verifyEmail = async (
 				},
 			},
 		});
-	} catch (error) {
-		res.status(400).json({
-			status: "fail",
-			message: error,
-		});
-	}
-};
+	},
+);
