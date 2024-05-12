@@ -3,6 +3,7 @@ import userRouter from "./route/user-routes";
 import authRouter from "./route/auth-routes";
 import AppError from "./utils/app-error";
 import globalErrorHandler from "./utils/global-error-handler";
+import HttpStatusCode from "./utils/http-status-code";
 
 const app = express();
 
@@ -18,7 +19,12 @@ app.use("/api/v1/user", userRouter);
  * i.e., when a route is requested that does not exist on the server.
  */
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
-	next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+	next(
+		new AppError(
+			`Can't find ${req.originalUrl} on this server!`,
+			HttpStatusCode.NOT_FOUND,
+		),
+	);
 });
 
 /**
