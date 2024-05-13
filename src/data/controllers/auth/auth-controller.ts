@@ -1,10 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType, IUser } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
 import Email from "../../../utils/email";
 import crypto from "crypto";
 import catchAsync from "../../../utils/catch-async";
+import AppError from "../../../utils/app-error";
+import HttpStatusCode from "../../../utils/http-status-code";
+import { ILoginDto } from "../../dtos/login.dto";
 
 export const signup = catchAsync(
 	async (
@@ -84,6 +87,67 @@ export const verifyEmail = catchAsync(
 		await user.save({ validateBeforeSave: false });
 
 		res.status(200).json({
+			status: "success",
+			data: {
+				user: {
+					id: user._id as string,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+					authType: user.authType,
+				},
+			},
+		});
+	},
+);
+
+export const login = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			ILoginDto
+		>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> => {
+		// destructure the request body
+		const { email, password } = req.body;
+
+		// check if email and password exist
+		if (!email || !password) {
+			return next(
+				new AppError(
+					"Please provide email and password!",
+					HttpStatusCode.BAD_REQUEST,
+				),
+			);
+		}
+		// check if user exists and password is correct
+		const user: IUser | null = await User.findOne({ email }).select(
+			"+password",
+		);
+
+		if (!user || !(await user.checkPassword(password, user.password))) {
+			return next(
+				new AppError(
+					"Incorrect email or password",
+					HttpStatusCode.UNAUTHORIZED,
+				),
+			);
+		}
+
+		if (!user.emailVerified) {
+			// 403 (Forbidden): If the user's email is not verified and they aren't allowed to perform the requested action without a verified email
+			return next(
+				new AppError(
+					"Please verify your email",
+					HttpStatusCode.FORBIDDEN,
+				),
+			);
+		}
+
+		res.status(HttpStatusCode.OK).json({
 			status: "success",
 			data: {
 				user: {

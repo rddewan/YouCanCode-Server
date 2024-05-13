@@ -29,6 +29,7 @@ export interface IUser extends mongoose.Document {
 	createdAt: Date;
 	updatedAt: Date;
 	createVerifyEmailToken: () => string;
+	checkPassword: (hash: string, userPassword: string) => Promise<boolean>;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -130,6 +131,20 @@ userSchema.methods.createVerifyEmailToken = function (): string {
 	this.verifyEmailExpires = Date.now() + 60 * 60 * 1000 * 24;
 	// return the token
 	return token;
+};
+
+/**
+ * Checks if the provided password matches the hashed password stored in the user schema.
+ *
+ * @param {string} hash - The hashed password to compare against.
+ * @param {string} userPassword - The password to be checked.
+ * @return {Promise<boolean>} A promise that resolves to a boolean indicating whether the passwords match.
+ */
+userSchema.methods.checkPassword = async function (
+	hash: string,
+	userPassword: string,
+): Promise<boolean> {
+	return await bcrypt.compare(userPassword, hash);
 };
 
 const User = mongoose.model<IUser>("User", userSchema, "users");
