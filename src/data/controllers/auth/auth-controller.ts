@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType, IUser } from "../../../model/user-model";
 import { UserReponse } from "../../../model/types/user-response";
@@ -8,6 +9,44 @@ import catchAsync from "../../../utils/catch-async";
 import AppError from "../../../utils/app-error";
 import HttpStatusCode from "../../../utils/http-status-code";
 import { ILoginDto } from "../../dtos/login.dto";
+
+/**
+ * Generates an access token for the provided user ID.
+ *
+ * @param {string} id - The user ID for which the access token is generated.
+ * @return {string} The generated access token.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const generateAccessToken = (id: string): string => {
+	const accessToken = jwt.sign(
+		{ id },
+		process.env.JWT_ACCESS_TOKEN_SECRET || "",
+		{
+			expiresIn: process.env.JWT_AUTH_TOKEN_EXPIRES_IN || 300,
+		},
+	);
+
+	return accessToken;
+};
+
+/**
+ * Generates a refresh token for the provided user ID.
+ *
+ * @param {string} id - The user ID for which the refresh token is generated.
+ * @return {string} The generated refresh token.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const generateRefreshToken = (id: string): string => {
+	const refreshToken = jwt.sign(
+		{ id },
+		process.env.JWT_REFRESH_TOKEN_SECRET || "",
+		{
+			expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || "7d",
+		},
+	);
+
+	return refreshToken;
+};
 
 export const signup = catchAsync(
 	async (
