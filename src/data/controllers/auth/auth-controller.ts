@@ -9,6 +9,7 @@ import catchAsync from "../../../utils/catch-async";
 import AppError from "../../../utils/app-error";
 import HttpStatusCode from "../../../utils/http-status-code";
 import { ILoginDto } from "../../dtos/login.dto";
+import RefreshToken from "../../../model/refresh-token-model";
 
 /**
  * Generates an access token for the provided user ID.
@@ -46,6 +47,36 @@ const generateRefreshToken = (id: string): string => {
 	);
 
 	return refreshToken;
+};
+
+const createAndSendToken = async (
+	user: IUser,
+	res: Response,
+): Promise<void> => {
+	const accessToken = generateAccessToken(user._id as string);
+	const refreshToken = generateRefreshToken(user._id as string);
+
+	await RefreshToken.findOneAndDelete({
+		userId: { $eq: user._id as string },
+	});
+
+	const hashRefreshToken = crypto
+		.createHash("sha256")
+		.update(refreshToken)
+		.digest("hex");
+
+	await RefreshToken.create({
+		refreshToken: hashRefreshToken,
+		userId: user._id as string,
+	});
+
+	res.status(HttpStatusCode.OK).json({
+		status: "success",
+		data: {
+			accessToken,
+			refreshToken,
+		},
+	});
 };
 
 export const signup = catchAsync(
@@ -186,17 +217,6 @@ export const login = catchAsync(
 			);
 		}
 
-		res.status(HttpStatusCode.OK).json({
-			status: "success",
-			data: {
-				user: {
-					id: user._id as string,
-					name: user.name,
-					email: user.email,
-					role: user.role,
-					authType: user.authType,
-				},
-			},
-		});
+		await createAndSendToken(user, res);
 	},
 );
