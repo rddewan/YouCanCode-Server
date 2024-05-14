@@ -198,7 +198,7 @@ export const login = catchAsync(
 			"+password",
 		);
 
-		if (!user || !(await user.checkPassword(password, user.password))) {
+		if (!user || !(await user.checkPassword(user.password, password))) {
 			return next(
 				new AppError(
 					"Incorrect email or password",
