@@ -12,6 +12,11 @@ import { ILoginDto } from "../../dtos/login.dto";
 import RefreshToken from "../../../model/refresh-token-model";
 import { promisify } from "util";
 
+type verifyFunction = (
+	token: string,
+	secret: jwt.Secret,
+) => Promise<JwtPayload>;
+
 /**
  * Generates an access token for the provided user ID.
  *
@@ -80,35 +85,30 @@ const createAndSendToken = async (
 	});
 };
 
-// Define a type for the return type of the verify function
-type VerifyFunction = (
-	token: string,
-	secret: jwt.Secret,
-) => Promise<JwtPayload>;
-
 /**
- * Verifies the refresh token using the provided secret and returns the decoded token.
+ * Verifies the refresh token using the provided secret and returns the decoded payload.
  *
  * @param {string} refreshToken - The refresh token to be verified.
- * @param {string} secret - The secret used for verification.
- * @param {NextFunction} next - The next function to handle errors.
- * @return {Promise<any>} A promise that resolves to the decoded refresh token.
+ * @param {jwt.Secret} secret - The secret key for verification.
+ * @param {NextFunction} next - The next function to call in case of errors.
+ * @return {Promise<JwtPayload | undefined>} The decoded payload if verification is successful, otherwise undefined.
  */
 export const verifyRefreshToken = async (
 	refreshToken: string,
-	secret: string,
+	secret: jwt.Secret,
 	next: NextFunction,
-): Promise<JwtPayload> => {
+): Promise<JwtPayload | undefined> => {
 	try {
-		const verify: VerifyFunction = promisify(jwt.verify);
-		const decod = await verify(refreshToken, secret);
+		const verify: verifyFunction = promisify(jwt.verify);
 
-		return decod;
+		const decode = await verify(refreshToken, secret);
+
+		return decode;
 	} catch (error) {
 		if (error instanceof jwt.TokenExpiredError) {
 			next(
 				new AppError(
-					"Your refresh token is expired, please login again",
+					"Your refresh token token expired, please login again",
 					HttpStatusCode.INVALID_TOKEN,
 				),
 			);
