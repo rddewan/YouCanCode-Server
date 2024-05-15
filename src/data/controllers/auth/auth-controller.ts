@@ -127,6 +127,36 @@ export const verifyRefreshToken = async (
 	}
 };
 
+export const verifyAccessToken = async (
+	accessToken: string,
+	secret: jwt.Secret,
+	next: NextFunction,
+): Promise<JwtPayload | undefined> => {
+	try {
+		const verify: verifyFunction = promisify(jwt.verify);
+
+		const decode = await verify(accessToken, secret);
+
+		return decode;
+	} catch (error) {
+		if (error instanceof jwt.TokenExpiredError) {
+			next(
+				new AppError(
+					"Your access token token expired, please login again",
+					HttpStatusCode.UNAUTHORIZED,
+				),
+			);
+		} else {
+			next(
+				new AppError(
+					"Your access token is invalid, please login again",
+					HttpStatusCode.BAD_REQUEST,
+				),
+			);
+		}
+	}
+};
+
 export const createNewToken = catchAsync(
 	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		const body = req.body as CreateNewTokenRequestBody;
