@@ -9,8 +9,12 @@ import catchAsync from "../../../utils/catch-async";
 import AppError from "../../../utils/app-error";
 import HttpStatusCode from "../../../utils/http-status-code";
 import { ILoginDto } from "../../dtos/login.dto";
-import RefreshToken from "../../../model/refresh-token-model";
+import RefreshToken, {
+	IRefreshToken,
+} from "../../../model/refresh-token-model";
 import { promisify } from "util";
+import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body";
+import { RequestCookies } from "../../../model/types/request-cookies";
 
 type verifyFunction = (
 	token: string,
@@ -122,6 +126,57 @@ export const verifyRefreshToken = async (
 		}
 	}
 };
+
+export const createNewToken = catchAsync(
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		const body = req.body as CreateNewTokenRequestBody;
+		const cookies = req.cookies as RequestCookies;
+
+		const refreshToken = body.refreshToken || cookies.refreshToken;
+
+		// check if the refresh token exists in the request
+		if (!refreshToken) {
+			return next(
+				new AppError(
+					"Your refresh token is missing, please login again",
+					HttpStatusCode.INVALID_TOKEN,
+				),
+			);
+		}
+
+		// verify the refresh token
+		const JWT_REFRESH_TOKEN_SECRET =
+			process.env.JWT_REFRESH_TOKEN_SECRET || "";
+		const decoded = await verifyRefreshToken(
+			refreshToken,
+			JWT_REFRESH_TOKEN_SECRET,
+			next,
+		);
+		// check if the user still exists in the DB
+		const user: IUser | null = await User.findById(decoded?.id as string);
+
+		const refreshTokenHash = crypto
+			.createHash("sha256")
+			.update(refreshToken)
+			.digest("hex");
+
+		const token: IRefreshToken | null = await RefreshToken.findOne({
+			userId: { $eq: user?._id as string },
+			refreshToken: { $eq: refreshTokenHash },
+		});
+
+		if (!token || !user) {
+			return next(
+				new AppError(
+					"User or Token does not exist, please login again",
+					HttpStatusCode.NOT_FOUND,
+				),
+			);
+		}
+
+		await createAndSendToken(user, res);
+	},
+);
 
 export const signup = catchAsync(
 	async (
