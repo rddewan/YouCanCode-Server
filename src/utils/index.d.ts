@@ -1,4 +1,4 @@
-import { Express, Request } from "express";
+import { IUser } from "../model/user-model";
 
 /**
  * declare global: This line is saying that you want to extend a global, built-in object.
@@ -18,11 +18,7 @@ import { Express, Request } from "express";
 declare global {
 	namespace Express {
 		interface Request {
-			user?: {
-				id: string;
-				email: string;
-				name: string;
-			};
+			user: IUser;
 		}
 	}
 }

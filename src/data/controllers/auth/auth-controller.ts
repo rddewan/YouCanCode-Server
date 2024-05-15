@@ -15,6 +15,7 @@ import RefreshToken, {
 import { promisify } from "util";
 import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body";
 import { RequestCookies } from "../../../model/types/request-cookies";
+import { RequestHeaders } from "../../../model/types/request-headers";
 
 type verifyFunction = (
 	token: string,
@@ -347,5 +348,57 @@ export const login = catchAsync(
 		}
 
 		await createAndSendToken(user, res);
+	},
+);
+
+export const protect = catchAsync(
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		let token: string | undefined;
+
+		const headers = req.headers as RequestHeaders;
+		const cookies = req.cookies as RequestCookies;
+
+		if (
+			headers.authorization &&
+			headers.authorization.startsWith("Bearer")
+		) {
+			token = headers.authorization.split(" ")[1];
+		} else if (cookies.accessToken) {
+			token = cookies.accessToken;
+		} else {
+			return next(
+				new AppError(
+					"You are not logged in",
+					HttpStatusCode.UNAUTHORIZED,
+				),
+			);
+		}
+
+		// verify the access token
+		const JWT_ACCESS_TOKEN_SECRET =
+			process.env.JWT_ACCESS_TOKEN_SECRET || "";
+		const decoded = await verifyAccessToken(
+			token,
+			JWT_ACCESS_TOKEN_SECRET,
+			next,
+		);
+
+		// check if the user exists
+		const currentUser: IUser | null = await User.findById(
+			decoded?.id as string,
+		);
+
+		if (!currentUser) {
+			return next(
+				new AppError(
+					"The user belonging to this token does no longer exist.",
+					HttpStatusCode.NOT_FOUND,
+				),
+			);
+		}
+
+		req.user = currentUser;
+
+		next();
 	},
 );
