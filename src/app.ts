@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/users", userRouter);
 
 /**
  * The app.all() middleware function in your code is a catch-all route handler

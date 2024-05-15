@@ -397,6 +397,7 @@ export const protect = catchAsync(
 			);
 		}
 
+		// add a current user to the request object
 		req.user = currentUser;
 
 		next();
