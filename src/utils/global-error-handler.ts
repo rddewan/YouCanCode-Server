@@ -1,7 +1,7 @@
 //import { NextFunction } from "express-serve-static-core";
 import HttpStatusCode from "../utils/http-status-code";
 import AppError from "./app-error";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 const sendErrorDev = (err: AppError, req: Request, res: Response) => {
 	err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;
@@ -31,7 +31,22 @@ const sendErrorProd = (err: AppError, req: Request, res: Response) => {
 	}
 };
 
-const globalErrorHandler = (err: AppError, req: Request, res: Response) => {
+/**
+ * Global error handler for handling different error scenarios based on the environment.
+ *
+ * @param {AppError} err - The error object to be handled
+ * @param {Request} req - The request object
+ * @param {Response} res - The response object
+ * @param {NextFunction} next - The next function in the middleware chain
+ */
+
+const globalErrorHandler = (
+	err: AppError,
+	req: Request,
+	res: Response,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	next: NextFunction,
+) => {
 	if (process.env.NODE_ENV === "development") {
 		sendErrorDev(err, req, res);
 	} else if (process.env.NODE_ENV === "production") {

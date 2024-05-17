@@ -107,6 +107,8 @@
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */
 	},
 	"ts-node": {
-		"experimentalSpecifierResolution": "node"
+		"experimentalSpecifierResolution": "node",
+		"esm": true,
+		"transpileOnly": true
 	}
 }
