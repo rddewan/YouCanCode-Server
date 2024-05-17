@@ -117,6 +117,11 @@ userSchema.pre("save", async function (next) {
 	next();
 });
 
+/**
+ * Generates a token for email verification.
+ *
+ * @return {string} The generated email verification token.
+ */
 userSchema.methods.createVerifyEmailToken = function (): string {
 	// generate a token 32 bytes. It is then converted to a hexadecimal string
 	const token = crypto.randomBytes(32).toString("hex");
@@ -129,6 +134,27 @@ userSchema.methods.createVerifyEmailToken = function (): string {
 	// set the expires time to 1 day or 24 hrs
 	// verify token will expire in 24 hrs
 	this.verifyEmailExpires = Date.now() + 60 * 60 * 1000 * 24;
+	// return the token
+	return token;
+};
+
+/**
+ * Generates a password reset token for the user.
+ *
+ * @return {string} The generated password reset token.
+ */
+userSchema.methods.createPasswordResetToken = function (): string {
+	// generate a token 32 bytes. It is then converted to a hexadecimal string
+	const token = crypto.randomBytes(32).toString("hex");
+	// store the token in the database
+	// encrypt the token witht he SHA-256 hashing algorithm
+	this.passwordResetToken = crypto
+		.createHash("sha256")
+		.update(token)
+		.digest("hex");
+	// set the expires time to 1 day or 24 hrs
+	// verify token will expire in 24 hrs
+	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 	// return the token
 	return token;
 };
