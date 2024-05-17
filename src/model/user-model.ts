@@ -29,6 +29,7 @@ export interface IUser extends mongoose.Document {
 	createdAt: Date;
 	updatedAt: Date;
 	createVerifyEmailToken: () => string;
+	createPasswordResetToken: () => string;
 	checkPassword: (hash: string, userPassword: string) => Promise<boolean>;
 }
 

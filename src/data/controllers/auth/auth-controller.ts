@@ -403,3 +403,65 @@ export const protect = catchAsync(
 		next();
 	},
 );
+
+export const forgotPasword = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IUserDto
+		>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> => {
+		const user: IUser | null = await User.findOne({
+			email: req.body.email,
+		});
+
+		// check if the user exists
+		if (!user) {
+			return next(
+				new AppError(
+					"There is no user with that email address",
+					HttpStatusCode.NOT_FOUND,
+				),
+			);
+		}
+
+		// generate a password reset token
+		const resetToken = user.createPasswordResetToken();
+		// save the user - we have updated the user model - resetPasswordToken/resetPasswordExpires
+		await user.save({ validateBeforeSave: false });
+
+		// protocol is http or https
+		const protocol = req.protocol;
+		// host is localhost:3000 - mobileacademy.io
+		const host = req.get("host");
+		// create a verify email url
+		const passwordResetUrl = `${protocol}://${host}/api/v1/auth/reset-password/${resetToken}`;
+
+		try {
+			// send the verify email
+			await new Email(
+				user,
+				passwordResetUrl,
+				"10 minutes",
+			).sendPasswordResetEmail();
+			res.status(HttpStatusCode.OK).json({
+				status: "success",
+				message: "Password reset token sent to email",
+			});
+		} catch (error) {
+			user.passwordResetToken = undefined;
+			user.passwordResetExpires = undefined;
+			await user.save({ validateBeforeSave: false });
+
+			return next(
+				new AppError(
+					"There was an error sending the email. Try again later",
+					HttpStatusCode.INTERNAL_SERVER_ERROR,
+				),
+			);
+		}
+	},
+);
