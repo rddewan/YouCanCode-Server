@@ -84,6 +84,9 @@ export default class Email {
 	}
 
 	async sendPasswordResetEmail() {
-		await this.send("verifyEmail", "YouCanCode: Verify your email address");
+		await this.send(
+			"passwordResetEmail",
+			"YouCanCode: Reset your password",
+		);
 	}
 }
