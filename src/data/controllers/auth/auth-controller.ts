@@ -449,7 +449,9 @@ export const forgotPasword = catchAsync(
 			).sendPasswordResetEmail();
 			res.status(HttpStatusCode.OK).json({
 				status: "success",
-				message: "Password reset token sent to email",
+				data: {
+					emailSent: true,
+				},
 			});
 		} catch (error) {
 			user.passwordResetToken = undefined;
