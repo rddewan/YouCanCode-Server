@@ -153,8 +153,8 @@ userSchema.methods.createPasswordResetToken = function (): string {
 		.createHash("sha256")
 		.update(token)
 		.digest("hex");
-	// set the expires time to 1 day or 24 hrs
-	// verify token will expire in 24 hrs
+	// set the expires time to 10 mins
+	// verify token will expire in 10 mins
 	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 	// return the token
 	return token;
