@@ -31,6 +31,7 @@ export interface IUser extends mongoose.Document {
 	createVerifyEmailToken: () => string;
 	createPasswordResetToken: () => string;
 	checkPassword: (hash: string, userPassword: string) => Promise<boolean>;
+	changedPasswordAfter: (JWTTimestamp: number) => boolean;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -172,6 +173,31 @@ userSchema.methods.checkPassword = async function (
 	userPassword: string,
 ): Promise<boolean> {
 	return await bcrypt.compare(userPassword, hash);
+};
+
+/**
+ * Checks if the password should be changed based on the provided JWT timestamp.
+ *
+ * @param {number} JWTTimeStamp - The JWT timestamp to compare against the password change timestamp.
+ * @return {boolean} Returns true if the password should be changed, false otherwise.
+ */
+userSchema.methods.changePasswordAfter = function (
+	this: IUser,
+	JWTTimeStamp: number,
+): boolean {
+	// This checks if a password change timestamp (passwordChangedAt) exists for the user
+	// If it doesn't exist, that means the password has never been changed,
+	// so it skips to the end of the function and returns false.
+	if (this.passwordChangedAt) {
+		// .getTime(), which gives the timestamp in milliseconds, and then dividing by 1000 to convert it to seconds
+		const changeTimeStamp: number = parseInt(
+			(this.passwordChangedAt.getTime() / 1000).toString(),
+			10,
+		);
+		// compare timestamps
+		return JWTTimeStamp < changeTimeStamp;
+	}
+	return false;
 };
 
 const User = mongoose.model<IUser>("User", userSchema, "users");
