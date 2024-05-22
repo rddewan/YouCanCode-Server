@@ -16,6 +16,7 @@ import { promisify } from "util";
 import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body";
 import { RequestCookies } from "../../../model/types/request-cookies";
 import { RequestHeaders } from "../../../model/types/request-headers";
+import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto";
 
 type verifyFunction = (
 	token: string,
@@ -521,6 +522,52 @@ export const resetPassword = catchAsync(
 			status: "success",
 			data: {
 				passwordRest: true,
+			},
+		});
+	},
+);
+
+export const updatePassword = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IUpdatePasswordDto
+		>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> => {
+		const user: IUser | null = await User.findById(req.user?.id).select(
+			"+password",
+		);
+		if (!user) {
+			return next(
+				new AppError(
+					"The user belonging to this token does no longer exist.",
+					HttpStatusCode.NOT_FOUND,
+				),
+			);
+		}
+		if (
+			!(await user.checkPassword(req.body.currentPassword, user.password))
+		) {
+			return next(
+				new AppError(
+					"Your current password is wrong.",
+					HttpStatusCode.BAD_REQUEST,
+				),
+			);
+		}
+		// update user password
+		user.password = req.body.newPassword;
+		user.passwordConfirm = req.body.passwordConfirm;
+		// save the new password to DB
+		await user.save();
+		// send the response
+		res.status(HttpStatusCode.OK).json({
+			status: "success",
+			data: {
+				passwordUpdated: true,
 			},
 		});
 	},
