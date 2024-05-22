@@ -549,7 +549,10 @@ export const updatePassword = catchAsync(
 			);
 		}
 		if (
-			!(await user.checkPassword(req.body.currentPassword, user.password))
+			!(await user.comparePassword(
+				req.body.currentPassword,
+				user.password,
+			))
 		) {
 			return next(
 				new AppError(
