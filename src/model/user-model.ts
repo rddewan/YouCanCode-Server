@@ -32,6 +32,10 @@ export interface IUser extends mongoose.Document {
 	createPasswordResetToken: () => string;
 	checkPassword: (hash: string, userPassword: string) => Promise<boolean>;
 	changedPasswordAfter: (JWTTimeStamp: number) => boolean;
+	comparePassword: (
+		password: string,
+		passwordHash: string,
+	) => Promise<boolean>;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -205,6 +209,20 @@ userSchema.methods.changedPasswordAfter = function (
 	}
 
 	return false;
+};
+
+/**
+ * Compares a provided password with a hashed password and returns a Promise that resolves to a boolean indicating whether the passwords match.
+ *
+ * @param {string} password - The password to be checked.
+ * @param {string} passwordHash - The hashed password to compare against.
+ * @return {Promise<boolean>} A Promise that resolves to a boolean indicating whether the passwords match.
+ */
+userSchema.methods.comparePassword = async function (
+	password: string,
+	passwordHash: string,
+): Promise<boolean> {
+	return bcrypt.compare(password, passwordHash);
 };
 
 const User = mongoose.model<IUser>("User", userSchema, "users");
