@@ -31,7 +31,7 @@ export interface IUser extends mongoose.Document {
 	createVerifyEmailToken: () => string;
 	createPasswordResetToken: () => string;
 	checkPassword: (hash: string, userPassword: string) => Promise<boolean>;
-	changedPasswordAfter: (JWTTimestamp: number) => boolean;
+	changedPasswordAfter: (JWTTimeStamp: number) => boolean;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -119,6 +119,20 @@ userSchema.pre("save", async function (next) {
 	next();
 });
 
+// pre hook middleware - run before save and create
+// function to udate the passwordChangedAt field
+// only run this function if the password was actually modified
+userSchema.pre("save", function (next) {
+	// only run this function if the password was actually modified
+	// The 'isModified' method is used for checking if a certain field is modified since being loaded in from the database.
+	// The 'isNew' property is a boolean indicating whether this document was just created.
+	// If the 'password' field on 'this' instance wasn't changed, or if the document is new,
+	// the function immediately calls 'next' and ends
+	if (!this.isModified("password") || this.isNew) return next();
+	this.passwordChangedAt = new Date(Date.now() - 1000);
+	next();
+});
+
 /**
  * Generates a token for email verification.
  *
@@ -176,27 +190,20 @@ userSchema.methods.checkPassword = async function (
 };
 
 /**
- * Checks if the password should be changed based on the provided JWT timestamp.
+ * Checks if the password has been changed after the given JWT token timestamp.
  *
- * @param {number} JWTTimeStamp - The JWT timestamp to compare against the password change timestamp.
- * @return {boolean} Returns true if the password should be changed, false otherwise.
+ * @param {number} JWTTokenTimeStamp - The timestamp of the JWT token.
+ * @return {boolean} Returns true if the password has been changed after the given timestamp, false otherwise.
  */
-userSchema.methods.changePasswordAfter = function (
+userSchema.methods.changedPasswordAfter = function (
 	this: IUser,
-	JWTTimeStamp: number,
+	JWTTokenTimeStamp: number,
 ): boolean {
-	// This checks if a password change timestamp (passwordChangedAt) exists for the user
-	// If it doesn't exist, that means the password has never been changed,
-	// so it skips to the end of the function and returns false.
 	if (this.passwordChangedAt) {
-		// .getTime(), which gives the timestamp in milliseconds, and then dividing by 1000 to convert it to seconds
-		const changeTimeStamp: number = parseInt(
-			(this.passwordChangedAt.getTime() / 1000).toString(),
-			10,
-		);
-		// compare timestamps
-		return JWTTimeStamp < changeTimeStamp;
+		const changedTimeStamp = this.passwordChangedAt.getTime() / 1000;
+		return JWTTokenTimeStamp < changedTimeStamp;
 	}
+
 	return false;
 };
 

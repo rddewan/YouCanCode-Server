@@ -397,6 +397,16 @@ export const protect = catchAsync(
 			);
 		}
 
+		// check if the user changed password after the token was issued
+		if (currentUser.changedPasswordAfter(decoded?.iat as number)) {
+			return next(
+				new AppError(
+					"The user recently changed password. Please log in again.",
+					HttpStatusCode.INVALID_TOKEN,
+				),
+			);
+		}
+
 		// add a current user to the request object
 		req.user = currentUser;
 
