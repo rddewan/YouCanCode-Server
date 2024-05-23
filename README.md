@@ -24,6 +24,8 @@
 -   npm i -D @types/validator
 -   npm i jsonwebtoken
 -   npm i -D @types/jsonwebtoken
+-   npm install cookie-parser
+-   npm i --save-dev @types/cookie-parser
 
 ### Setup and configure TypeScript
 

@@ -4,9 +4,11 @@ import authRouter from "./route/auth-routes";
 import AppError from "./utils/app-error";
 import globalErrorHandler from "./utils/global-error-handler";
 import HttpStatusCode from "./utils/http-status-code";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);

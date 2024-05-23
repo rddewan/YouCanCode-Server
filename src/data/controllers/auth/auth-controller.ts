@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { CookieOptions, NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType, IUser } from "../../../model/user-model";
@@ -68,6 +68,24 @@ const createAndSendToken = async (
 	const accessToken = generateAccessToken(user._id as string);
 	const refreshToken = generateRefreshToken(user._id as string);
 
+	const oneHour = 60 * 60 * 1000;
+	const oneDay = 24 * oneHour;
+	const isSecure = process.env.COOKIES_SECURE === "true";
+
+	const accessTokenCookiesOption: CookieOptions = {
+		expires: new Date(Date.now() + oneHour),
+		httpOnly: true,
+		secure: isSecure,
+		sameSite: "none",
+	};
+
+	const refreshTokenCookiesOption: CookieOptions = {
+		expires: new Date(Date.now() + oneDay * 7),
+		httpOnly: true,
+		secure: isSecure,
+		sameSite: "none",
+	};
+
 	await RefreshToken.findOneAndDelete({
 		userId: { $eq: user._id as string },
 	});
@@ -81,6 +99,9 @@ const createAndSendToken = async (
 		refreshToken: hashRefreshToken,
 		userId: user._id as string,
 	});
+
+	res.cookie("accessToken", accessToken, accessTokenCookiesOption);
+	res.cookie("refreshToken", refreshToken, refreshTokenCookiesOption);
 
 	res.status(HttpStatusCode.OK).json({
 		status: "success",
