@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import userRouter from "./route/user-routes";
 import authRouter from "./route/auth-routes";
+import adminRouter from "./route/admin-routes";
 import AppError from "./utils/app-error";
 import globalErrorHandler from "./utils/global-error-handler";
 import HttpStatusCode from "./utils/http-status-code";
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/admin", adminRouter);
 
 /**
  * The app.all() middleware function in your code is a catch-all route handler

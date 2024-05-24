@@ -9,6 +9,11 @@ export enum AuthType {
 	phone = "phone",
 }
 
+export enum UserRole {
+	user = "user",
+	admin = "admin",
+}
+
 export interface IUser extends mongoose.Document {
 	name: string;
 	email: string;
@@ -66,7 +71,7 @@ const userSchema = new mongoose.Schema<IUser>(
 		},
 		role: {
 			type: String,
-			enum: ["user", "admin"],
+			enum: UserRole,
 			default: "user",
 		},
 		password: {

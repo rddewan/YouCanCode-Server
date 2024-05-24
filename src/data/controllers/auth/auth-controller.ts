@@ -1,4 +1,10 @@
-import { CookieOptions, NextFunction, Request, Response } from "express";
+import {
+	CookieOptions,
+	NextFunction,
+	Request,
+	RequestHandler,
+	Response,
+} from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { IUserDto } from "../../dtos/user.dto";
 import User, { AuthType, IUser } from "../../../model/user-model";
@@ -596,3 +602,24 @@ export const updatePassword = catchAsync(
 		});
 	},
 );
+
+/**
+ * Middleware function to restrict access to certain routes based on user roles.
+ *
+ * @param {string[]} roles - The roles that are allowed to access the route.
+ * @return {RequestHandler} - The request handler function.
+ */
+export const restrict =
+	(...roles: string[]): RequestHandler =>
+	(req: Request, res: Response, next: NextFunction) => {
+		if (!roles.includes(req.user?.role)) {
+			return next(
+				new AppError(
+					"You do not have permission to perform this action",
+					HttpStatusCode.FORBIDDEN,
+				),
+			);
+		}
+
+		next();
+	};
