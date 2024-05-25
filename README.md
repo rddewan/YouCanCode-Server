@@ -40,3 +40,11 @@
 ### Useful command
 
 -   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+curl --location --request POST 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCpIV-550z7P_sjnoxjcoau7XXa-eufZ14' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+"email": "richard@gmail.com",
+"password": "sdfdsd3425gtewtw4234324",
+"returnSecureToken": true
+}'

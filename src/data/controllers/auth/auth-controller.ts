@@ -626,6 +626,14 @@ export const restrict =
 		next();
 	};
 
+/**
+ * Handles the authentication process for a Firebase social login.
+ *
+ * @param {Request<Record<string, unknown>, Record<string, unknown>, IFirebaseSocialLoginDto>} req - The request object containing the token.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next function to be called.
+ * @return {Promise<void>} - A promise that resolves when the authentication process is complete.
+ */
 export const firebaseSolicalLogin = async (
 	req: Request<
 		Record<string, unknown>,
@@ -659,12 +667,13 @@ export const firebaseSolicalLogin = async (
 		const user = await User.findOne({ email: userRecord.email });
 		if (!user) {
 			let newUser: IUser = new User({
-				name: userRecord.displayName,
+				name: userRecord.displayName || userRecord.email,
 				email: userRecord.email,
 				photo: userRecord.photoURL,
 				password: undefined,
 				passwordConfirm: undefined,
 				authType: AuthType.social,
+				emailVerified: true,
 			});
 			// save the new user to DB - without password
 			newUser = await newUser.save({ validateBeforeSave: false });
@@ -686,6 +695,7 @@ export const firebaseSolicalLogin = async (
 	} catch (error) {
 		if (error instanceof Error) {
 			const err = error as Error & { code?: string | number };
+
 			if (
 				err.code &&
 				typeof err.code === "string" &&
