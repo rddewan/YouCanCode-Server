@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
+import admin from "firebase-admin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,16 @@ const envFile = path.join(__dirname, `./../.env.${currentEnv}`);
 
 // env variables
 dotenv.config({ path: envFile });
+
+// iniitalize the firebase admin
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/gm, "\n");
+admin.initializeApp({
+	credential: admin.credential.cert({
+		projectId: process.env.FIREBASE_PROJECT_ID,
+		clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+		privateKey: privateKey,
+	}),
+});
 
 const DB: string = process.env.MONGO_DB?.replace(
 	"<PASSWORD>",
