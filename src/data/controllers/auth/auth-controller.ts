@@ -23,6 +23,8 @@ import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token
 import { RequestCookies } from "../../../model/types/request-cookies";
 import { RequestHeaders } from "../../../model/types/request-headers";
 import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto";
+import { IFirebaseSocialLoginDto } from "../../dtos/firebase-solical-login.dto";
+import admin from "firebase-admin";
 
 type verifyFunction = (
 	token: string,
@@ -623,3 +625,108 @@ export const restrict =
 
 		next();
 	};
+
+export const firebaseSolicalLogin = async (
+	req: Request<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		IFirebaseSocialLoginDto
+	>,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
+	try {
+		const token = req.body.token;
+
+		if (!token) {
+			return next(
+				new AppError(
+					"Please provide a token",
+					HttpStatusCode.BAD_REQUEST,
+				),
+			);
+		}
+
+		const decodedToken = await admin.auth().verifyIdToken(token, true);
+		// fetch the user from the firebase using the decoded token
+		const userRecord = await admin.auth().getUser(decodedToken.uid);
+		if (!userRecord) {
+			return next(
+				new AppError("User not found", HttpStatusCode.NOT_FOUND),
+			);
+		}
+
+		const user = await User.findOne({ email: userRecord.email });
+		if (!user) {
+			let newUser: IUser = new User({
+				name: userRecord.displayName,
+				email: userRecord.email,
+				photo: userRecord.photoURL,
+				password: undefined,
+				passwordConfirm: undefined,
+				authType: AuthType.social,
+			});
+			// save the new user to DB - without password
+			newUser = await newUser.save({ validateBeforeSave: false });
+			// protocol is http or https
+			const protocol = req.protocol;
+			// host is localhost:3000 - mobileacademy.io
+			const host = req.get("host");
+			// create a verify email url
+			const welcomeEmailUrl = `${protocol}://${host}/me`;
+			// send the verify email
+			await new Email(newUser, welcomeEmailUrl).sendWelcomeEmail();
+
+			// send the athentication token
+			await createAndSendToken(newUser, res);
+		} else {
+			// send the athentication token
+			await createAndSendToken(user, res);
+		}
+	} catch (error) {
+		if (error instanceof Error) {
+			const err = error as Error & { code?: string | number };
+			if (
+				err.code &&
+				typeof err.code === "string" &&
+				err.code.startsWith("auth/id-token-expired")
+			) {
+				next(
+					new AppError(
+						"Firebase id token has aexpired. Please login again",
+						HttpStatusCode.INVALID_TOKEN,
+					),
+				);
+			} else if (
+				err.code &&
+				typeof err.code === "string" &&
+				err.code.startsWith("auth/id-token-revoked")
+			) {
+				next(
+					new AppError(
+						"Firebase id token revoked. Please login again",
+						HttpStatusCode.INVALID_TOKEN,
+					),
+				);
+			} else if (
+				err.code &&
+				typeof err.code === "string" &&
+				err.code.startsWith("auth/user-disabled")
+			) {
+				next(
+					new AppError(
+						"Firebase user is disabled. Please login again",
+						HttpStatusCode.INVALID_TOKEN,
+					),
+				);
+			} else {
+				next(
+					new AppError(
+						"Something went wrong. Please try again",
+						HttpStatusCode.INTERNAL_SERVER_ERROR,
+					),
+				);
+			}
+		}
+	}
+};
