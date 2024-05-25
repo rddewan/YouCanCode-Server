@@ -26,6 +26,7 @@
 -   npm i -D @types/jsonwebtoken
 -   npm install cookie-parser
 -   npm i --save-dev @types/cookie-parser
+-   npm i firebase-admin
 
 ### Setup and configure TypeScript
 
