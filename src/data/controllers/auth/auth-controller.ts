@@ -654,7 +654,7 @@ export const firebaseSolicalLogin = async (
 				),
 			);
 		}
-
+		// verify the token
 		const decodedToken = await admin.auth().verifyIdToken(token, true);
 		// fetch the user from the firebase using the decoded token
 		const userRecord = await admin.auth().getUser(decodedToken.uid);
@@ -663,8 +663,9 @@ export const firebaseSolicalLogin = async (
 				new AppError("User not found", HttpStatusCode.NOT_FOUND),
 			);
 		}
-
+		// find the user in the DB by email
 		const user = await User.findOne({ email: userRecord.email });
+		// check if user exists
 		if (!user) {
 			let newUser: IUser = new User({
 				name: userRecord.displayName || userRecord.email,
@@ -681,9 +682,121 @@ export const firebaseSolicalLogin = async (
 			const protocol = req.protocol;
 			// host is localhost:3000 - mobileacademy.io
 			const host = req.get("host");
-			// create a verify email url
+			// create a welcome email url
 			const welcomeEmailUrl = `${protocol}://${host}/me`;
-			// send the verify email
+			// send the welcome email
+			await new Email(newUser, welcomeEmailUrl).sendWelcomeEmail();
+
+			// send the athentication token
+			await createAndSendToken(newUser, res);
+		} else {
+			// send the athentication token
+			await createAndSendToken(user, res);
+		}
+	} catch (error) {
+		if (error instanceof Error) {
+			const err = error as Error & { code?: string | number };
+
+			if (
+				err.code &&
+				typeof err.code === "string" &&
+				err.code.startsWith("auth/id-token-expired")
+			) {
+				next(
+					new AppError(
+						"Firebase id token has aexpired. Please login again",
+						HttpStatusCode.INVALID_TOKEN,
+					),
+				);
+			} else if (
+				err.code &&
+				typeof err.code === "string" &&
+				err.code.startsWith("auth/id-token-revoked")
+			) {
+				next(
+					new AppError(
+						"Firebase id token revoked. Please login again",
+						HttpStatusCode.INVALID_TOKEN,
+					),
+				);
+			} else if (
+				err.code &&
+				typeof err.code === "string" &&
+				err.code.startsWith("auth/user-disabled")
+			) {
+				next(
+					new AppError(
+						"Firebase user is disabled. Please login again",
+						HttpStatusCode.INVALID_TOKEN,
+					),
+				);
+			} else {
+				next(
+					new AppError(
+						"Something went wrong. Please try again",
+						HttpStatusCode.INTERNAL_SERVER_ERROR,
+					),
+				);
+			}
+		}
+	}
+};
+
+export const firebasePhoneLogin = async (
+	req: Request<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		IFirebaseSocialLoginDto
+	>,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
+	try {
+		const token = req.body.token;
+
+		if (!token) {
+			return next(
+				new AppError(
+					"Please provide a token",
+					HttpStatusCode.BAD_REQUEST,
+				),
+			);
+		}
+		// verify the token
+		const decodedToken = await admin.auth().verifyIdToken(token, true);
+		// fetch the user from the firebase using the decoded token
+		const userRecord = await admin.auth().getUser(decodedToken.uid);
+		// check if user exists
+		if (!userRecord) {
+			return next(
+				new AppError("User not found", HttpStatusCode.NOT_FOUND),
+			);
+		}
+		// find the user in the database by the phone number
+		const user = await User.findOne({
+			phoneNumber: userRecord.phoneNumber,
+		});
+		// check if user exists
+		if (!user) {
+			let newUser: IUser = new User({
+				name: userRecord.displayName || userRecord.phoneNumber,
+				email: userRecord.email || userRecord.uid,
+				photo: userRecord.photoURL,
+				password: undefined,
+				passwordConfirm: undefined,
+				phoneNumber: userRecord.phoneNumber,
+				authType: AuthType.phone,
+				emailVerified: true,
+			});
+			// save the new user to DB - without password
+			newUser = await newUser.save({ validateBeforeSave: false });
+			// protocol is http or https
+			const protocol = req.protocol;
+			// host is localhost:3000 - mobileacademy.io
+			const host = req.get("host");
+			// create a welcome email url
+			const welcomeEmailUrl = `${protocol}://${host}/me`;
+			// send the welcome email
 			await new Email(newUser, welcomeEmailUrl).sendWelcomeEmail();
 
 			// send the athentication token
