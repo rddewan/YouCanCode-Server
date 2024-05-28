@@ -41,7 +41,7 @@
 
 -   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
-curl --location --request POST 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCpIV-550z7P_sjnoxjcoau7XXa-eufZ14' \
+curl --location --request POST 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=YOUR_API_KEY' \
 --header 'Content-Type: application/json' \
 --data-raw '{
 "email": "richard@gmail.com",
