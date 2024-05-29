@@ -27,6 +27,8 @@
 -   npm install cookie-parser
 -   npm i --save-dev @types/cookie-parser
 -   npm i firebase-admin
+-   npm i cors
+-   npm i --save-dev @types/cors
 
 ### Setup and configure TypeScript
 
