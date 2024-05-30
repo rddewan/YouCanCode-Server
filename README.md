@@ -29,6 +29,8 @@
 -   npm i firebase-admin
 -   npm i cors
 -   npm i --save-dev @types/cors
+-   npm install @aws-sdk/client-s3
+-   npm i @aws-sdk/s3-request-presigner
 
 ### Setup and configure TypeScript
 

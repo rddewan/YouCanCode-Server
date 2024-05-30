@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
 import admin from "firebase-admin";
+import AwsS3Helper from "./utils/class/aws-s3-helper";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +25,9 @@ admin.initializeApp({
 		privateKey: privateKey,
 	}),
 });
+
+// initialize S3
+AwsS3Helper.getInstance();
 
 const DB: string = process.env.MONGO_DB?.replace(
 	"<PASSWORD>",
