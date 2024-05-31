@@ -31,6 +31,8 @@
 -   npm i --save-dev @types/cors
 -   npm install @aws-sdk/client-s3
 -   npm i @aws-sdk/s3-request-presigner
+-   npm i multer
+-   npm i --save-dev @types/multer
 
 ### Setup and configure TypeScript
 
