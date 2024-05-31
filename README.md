@@ -33,6 +33,7 @@
 -   npm i @aws-sdk/s3-request-presigner
 -   npm i multer
 -   npm i --save-dev @types/multer
+-   npm i --include=optional sharp
 
 ### Setup and configure TypeScript
 

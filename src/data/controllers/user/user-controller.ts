@@ -4,6 +4,7 @@ import User, { IUser } from "../../../model/user-model";
 import AppError from "../../../utils/app-error";
 import HttpStatusCode from "../../../utils/http-status-code";
 import multer, { FileFilterCallback } from "multer";
+import sharp from "sharp";
 
 /**
  * Filters the uploaded file to ensure it is an image.
@@ -30,6 +31,10 @@ const multerImageFilter = (
 	}
 };
 
+/**
+ * Returns a Multer instance that provides several methods
+ * for generating middleware that process files uploaded in multipart/form-data format.
+ */
 const upload = multer({
 	storage: multer.memoryStorage(),
 	limits: {
@@ -38,7 +43,41 @@ const upload = multer({
 	fileFilter: multerImageFilter,
 });
 
+/**
+ * Processes an image buffer by resizing it to a width and height of 200 pixels,
+ * preserving the aspect ratio, converting it to JPEG format with a quality of 75,
+ * and returning the resulting buffer.
+ *
+ * @param {Buffer} buffer - The image buffer to be processed.
+ * @return {Promise<Buffer>} A promise that resolves to the processed image buffer.
+ */
+const processImage = async (buffer: Buffer): Promise<Buffer> => {
+	return await sharp(buffer)
+		.resize({ width: 200, height: 200, fit: "contain" })
+		.toFormat("jpeg")
+		.jpeg({ quality: 75 })
+		.toBuffer();
+};
+
 export const uploadImage = upload.single("image"); // image is the name of the input field in the form
+
+export const resizeProfileImage = catchAsync(
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		// if there is no file to resize then return
+		if (!req.file) {
+			return next();
+		}
+		// set the file name
+		req.file.filename = `user-${req.user.id}}.jpeg`;
+
+		// resize the image and send as the buffer to the next middleware
+		const buffer = await processImage(req.file.buffer);
+		// Override the original buffer with the processed buffer
+		req.file.buffer = buffer;
+
+		next();
+	},
+);
 
 export const me = catchAsync(
 	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
