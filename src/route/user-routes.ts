@@ -1,5 +1,10 @@
 import { RequestHandler, Router } from "express";
-import { me } from "../data/controllers/user/user-controller";
+import {
+	me,
+	resizeProfileImage,
+	updateProfilePhtoto,
+	uploadImage,
+} from "../data/controllers/user/user-controller";
 import { protect } from "../data/controllers/auth/auth-controller";
 
 const router = Router();
@@ -8,5 +13,11 @@ const router = Router();
 router.use(protect);
 
 router.get("/me", me as RequestHandler);
+router.patch(
+	"/update-profile-photo",
+	uploadImage,
+	resizeProfileImage as RequestHandler,
+	updateProfilePhtoto as RequestHandler,
+);
 
 export default router;
