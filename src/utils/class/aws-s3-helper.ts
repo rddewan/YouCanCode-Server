@@ -61,7 +61,7 @@ class AwsS3Helper {
 	 */
 	public async uploadObject(
 		key: string,
-		body: string,
+		body: Buffer,
 		contentType: string,
 	): Promise<void> {
 		try {

@@ -5,6 +5,7 @@ import AppError from "../../../utils/app-error";
 import HttpStatusCode from "../../../utils/http-status-code";
 import multer, { FileFilterCallback } from "multer";
 import sharp from "sharp";
+import AwsS3Helper from "../../../utils/class/aws-s3-helper";
 
 /**
  * Filters the uploaded file to ensure it is an image.
@@ -93,6 +94,51 @@ export const me = catchAsync(
 			status: "success",
 			data: {
 				user,
+			},
+		});
+	},
+);
+
+export const updateProfilePhtoto = catchAsync(
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		// if there is no file then return error
+		const file = req.file;
+		if (!file) {
+			return next(
+				new AppError(
+					"Please upload an image",
+					HttpStatusCode.BAD_REQUEST,
+				),
+			);
+		}
+
+		// get the file name from the file
+		const fileName = file.filename;
+		// upload the file to s3 bucket
+		await AwsS3Helper.getInstance().uploadObject(
+			fileName,
+			file.buffer,
+			file.mimetype,
+		);
+
+		// generate the signed url - that will expires in 1 hour
+		const photoUrl = await AwsS3Helper.getInstance().getSignedUrl(
+			fileName,
+			3600,
+		);
+
+		// update the user profile photo
+		const user: IUser | null = await User.findByIdAndUpdate(
+			req.user.id,
+			{ photo: fileName },
+			{ new: true, runValidators: true },
+		);
+
+		res.status(HttpStatusCode.OK).json({
+			status: "success",
+			data: {
+				user,
+				photoUrl,
 			},
 		});
 	},
