@@ -2,6 +2,7 @@ import { RequestHandler, Router } from "express";
 import {
 	me,
 	resizeProfileImage,
+	updateMe,
 	updateProfilePhtoto,
 	uploadImage,
 } from "../data/controllers/user/user-controller";
@@ -19,5 +20,6 @@ router.patch(
 	resizeProfileImage as RequestHandler,
 	updateProfilePhtoto as RequestHandler,
 );
+router.patch("/update-me", updateMe as RequestHandler);
 
 export default router;
