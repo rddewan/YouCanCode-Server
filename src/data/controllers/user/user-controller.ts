@@ -6,6 +6,7 @@ import HttpStatusCode from "../../../utils/http-status-code";
 import multer, { FileFilterCallback } from "multer";
 import sharp from "sharp";
 import AwsS3Helper from "../../../utils/class/aws-s3-helper";
+import { IUpdateMeDto } from "../../dtos/update-me.dto";
 
 /**
  * Filters the uploaded file to ensure it is an image.
@@ -144,6 +145,37 @@ export const updateProfilePhtoto = catchAsync(
 	},
 );
 
+export const updateMe = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IUpdateMeDto
+		>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> => {
+		// if there is no name in the body then return error
+		if (!req.body.name) {
+			return next(
+				new AppError("Name is required", HttpStatusCode.BAD_REQUEST),
+			);
+		}
+		// find the user by id and update name
+		const user: IUser | null = await User.findByIdAndUpdate(
+			req.user.id,
+			req.body,
+			{ new: true, runValidators: true },
+		);
+
+		res.status(HttpStatusCode.OK).json({
+			status: "success",
+			data: {
+				user,
+			},
+		});
+	},
+);
 // export const create = async (
 // 	req: Request<object, object, IUserDto>,
 // 	res: Response,
