@@ -69,7 +69,7 @@ export const resizeProfileImage = catchAsync(
 			return next();
 		}
 		// set the file name
-		req.file.filename = `user-${req.user.id}}.jpeg`;
+		req.file.filename = `user-${req.user.id}.jpeg`;
 
 		// resize the image and send as the buffer to the next middleware
 		const buffer = await processImage(req.file.buffer);

@@ -20,10 +20,21 @@ const corsOptions: CorsOptions = {
 			"https://mobileacademy.io",
 			"https://wecancode.in",
 		];
-		if (origin && allowedOrigins.includes(origin)) {
-			callback(null, true);
+
+		if (process.env.NODE_ENV === "development") {
+			/// check if the origin is in the allowedOrigins array
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"), false);
+			}
 		} else {
-			callback(new Error("Not allowed by CORS"), false);
+			// check if the origin is in the allowedOrigins array
+			if (origin && allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"), false);
+			}
 		}
 	},
 	methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
