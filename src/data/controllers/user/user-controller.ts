@@ -176,6 +176,28 @@ export const updateMe = catchAsync(
 		});
 	},
 );
+
+export const deleteMe = catchAsync(
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		// find the user by id and delete
+		const user: IUser | null = await User.findByIdAndDelete(req.user.id);
+		// if no user is found then return error
+		if (!user) {
+			return next(
+				new AppError("User not found", HttpStatusCode.NOT_FOUND),
+			);
+		}
+		// delete the user photo from s3 bucket
+		if (user.photo) {
+			await AwsS3Helper.getInstance().deleteObject(user.photo);
+		}
+		// delete the user from the database
+		res.status(HttpStatusCode.NO_CONTENT).json({
+			status: "success",
+			data: null,
+		});
+	},
+);
 // export const create = async (
 // 	req: Request<object, object, IUserDto>,
 // 	res: Response,
