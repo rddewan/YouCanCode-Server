@@ -367,6 +367,17 @@ export const login = catchAsync(
 			);
 		}
 
+		// check if the user is active
+		if (!user.active) {
+			// 403 (Forbidden): If the user is not active
+			return next(
+				new AppError(
+					"Your account is not active. Please contact the admin",
+					HttpStatusCode.FORBIDDEN,
+				),
+			);
+		}
+
 		if (!user.emailVerified) {
 			// 403 (Forbidden): If the user's email is not verified and they aren't allowed to perform the requested action without a verified email
 			return next(

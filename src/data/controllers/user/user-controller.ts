@@ -198,28 +198,23 @@ export const deleteMe = catchAsync(
 		});
 	},
 );
-// export const create = async (
-// 	req: Request<object, object, IUserDto>,
-// 	res: Response,
-// ) => {
-// 	// if (req.user) {
-// 	// 	const userID = req.user.id;
-// 	// }
 
-// 	res.status(200).send("Hello from user controller");
-// };
+export const disableMe = catchAsync(
+	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		// find the user by id and update - set the active status to false
+		const user: IUser | null = await User.findByIdAndUpdate(req.user.id, {
+			isActive: false,
+		});
+		// if no user is found then return error
+		if (!user) {
+			return next(
+				new AppError("User not found", HttpStatusCode.NOT_FOUND),
+			);
+		}
 
-// export const getUserById = async (
-// 	req: Request<UserRouteParams, object, object, UserQueryParams>,
-// 	res: Response<UserReponse>,
-// ) => {
-// 	const routeParamsId = req.params.id;
-// 	const userId = req.query.id;
-
-// 	res.status(200).json({
-// 		status: "success",
-// 		data: {
-// 			id: userId || routeParamsId,
-// 		},
-// 	});
-// };
+		res.status(HttpStatusCode.NO_CONTENT).json({
+			status: "success",
+			data: null,
+		});
+	},
+);
