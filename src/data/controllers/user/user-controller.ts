@@ -203,7 +203,7 @@ export const disableMe = catchAsync(
 	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		// find the user by id and update - set the active status to false
 		const user: IUser | null = await User.findByIdAndUpdate(req.user.id, {
-			isActive: false,
+			active: false,
 		});
 		// if no user is found then return error
 		if (!user) {
