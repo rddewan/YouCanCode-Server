@@ -1,6 +1,7 @@
 import { RequestHandler, Router } from "express";
 import {
 	deleteMe,
+	disableMe,
 	me,
 	resizeProfileImage,
 	updateMe,
@@ -23,5 +24,6 @@ router.patch(
 );
 router.patch("/update-me", updateMe as RequestHandler);
 router.delete("/delete-me", deleteMe as RequestHandler);
+router.patch("/disable-me", disableMe as RequestHandler);
 
 export default router;
