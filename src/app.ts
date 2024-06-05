@@ -7,6 +7,11 @@ import globalErrorHandler from "./utils/global-error-handler";
 import HttpStatusCode from "./utils/http-status-code";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -46,6 +51,12 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 // middleware to parse the json
 app.use(express.json());
+
+// middleware to serve static files  from public folder
+app.use(express.static("public"));
+// set the view engine as ejs
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "view"));
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
