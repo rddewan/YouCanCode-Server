@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import userRouter from "./route/user-routes";
 import authRouter from "./route/auth-routes";
 import adminRouter from "./route/admin-routes";
+import homeRouter from "./route/home-routes";
 import AppError from "./utils/app-error";
 import globalErrorHandler from "./utils/global-error-handler";
 import HttpStatusCode from "./utils/http-status-code";
@@ -58,6 +59,7 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "view"));
 
+app.use("/", homeRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admin", adminRouter);
