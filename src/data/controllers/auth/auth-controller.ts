@@ -266,7 +266,7 @@ export const signup = catchAsync(
 		// host is localhost:3000 - mobileacademy.io
 		const host = req.get("host");
 		// create a verify email url
-		const verifyEmailUrl = `${protocol}://${host}/api/v1/auth/verify-email/${verifyEmailToken}`;
+		const verifyEmailUrl = `${protocol}://${host}/verify-email/${verifyEmailToken}`;
 		// send the verify email
 		await new Email(newUser, verifyEmailUrl, " 24 hours").sendVerifyEmail();
 
@@ -288,9 +288,17 @@ export const signup = catchAsync(
 // verify email
 export const verifyEmail = catchAsync(
 	async (req: Request, res: Response): Promise<void> => {
+		// check if the token is valid
+		const verifyEmailToken = req.params.token;
+		if (!verifyEmailToken) {
+			return res.render("page/verify-email-failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
 		const token = crypto
 			.createHash("sha256")
-			.update(req.params.token)
+			.update(verifyEmailToken)
 			.digest("hex");
 
 		const user: IUser | null = await User.findOne({
@@ -299,7 +307,9 @@ export const verifyEmail = catchAsync(
 		});
 
 		if (!user) {
-			throw new Error("Token is invalid or has expired");
+			return res.render("page/verify-email-failure", {
+				message: "Invalid token or  token has expired",
+			});
 		}
 
 		// protocol is http or https
@@ -316,17 +326,8 @@ export const verifyEmail = catchAsync(
 		// save the user - disable the validateBeforeSave option
 		await user.save({ validateBeforeSave: false });
 
-		res.status(200).json({
-			status: "success",
-			data: {
-				user: {
-					id: user._id as string,
-					name: user.name,
-					email: user.email,
-					role: user.role,
-					authType: user.authType,
-				},
-			},
+		res.render("page/verify-email-success", {
+			message: "Email verified successfully",
 		});
 	},
 );
