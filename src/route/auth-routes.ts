@@ -21,14 +21,8 @@ const router = Router();
 // WEB - server side rendering
 router.post("/reset", resetPasswordWeb as RequestHandler);
 router.get("/reset/:token", resetPasswordView as RequestHandler);
-router.get(
-	"/reset/status/reset-success",
-	passwordResetSuccess as RequestHandler,
-);
-router.get(
-	"/reset/status/reset-failure",
-	passwordResetFailure as RequestHandler,
-);
+router.get("/reset/status/success", passwordResetSuccess as RequestHandler);
+router.get("/reset/status/failure", passwordResetFailure as RequestHandler);
 
 // API
 router.post("/signup", signup as RequestHandler);
