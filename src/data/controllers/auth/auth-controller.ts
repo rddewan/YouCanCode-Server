@@ -491,7 +491,7 @@ export const forgotPasword = catchAsync(
 		// host is localhost:3000 - mobileacademy.io
 		const host = req.get("host");
 		// create a verify email url
-		const passwordResetUrl = `${protocol}://${host}/reset-password/${resetToken}`;
+		const passwordResetUrl = `${protocol}://${host}/password/reset/${resetToken}`;
 
 		try {
 			// send the verify email
@@ -565,6 +565,44 @@ export const resetPassword = catchAsync(
 			data: {
 				passwordRest: true,
 			},
+		});
+	},
+);
+
+export const resetPasswordView = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IUserDto
+		>,
+		res: Response,
+	): Promise<void> => {
+		const resetToken = req.params.token;
+		if (!resetToken) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(resetToken as string)
+			.digest("hex");
+
+		const user: IUser | null = await User.findOne({
+			passwordResetToken: hashedToken,
+			passwordResetExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		res.render("page/passwordReset/password-reset", {
+			token: resetToken,
 		});
 	},
 );
