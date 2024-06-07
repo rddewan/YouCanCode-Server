@@ -948,3 +948,21 @@ export const firebasePhoneLogin = async (
 		}
 	}
 };
+
+export const passwordResetSuccess = (req: Request, res: Response): void => {
+	const token = req.query.token as string;
+	if (!token) {
+		return res.render("page/404");
+	}
+
+	res.render("page/passwordReset/success");
+};
+
+export const passwordResetFailure = (req: Request, res: Response): void => {
+	const token = req.query.token as string;
+	if (!token) {
+		return res.render("page/404");
+	}
+
+	res.render("page/passwordReset/failure");
+};

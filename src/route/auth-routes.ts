@@ -5,8 +5,12 @@ import {
 	firebaseSolicalLogin,
 	forgotPasword,
 	login,
+	passwordResetFailure,
+	passwordResetSuccess,
 	protect,
 	resetPassword,
+	resetPasswordView,
+	resetPasswordWeb,
 	signup,
 	updatePassword,
 	verifyEmail,
@@ -14,6 +18,19 @@ import {
 
 const router = Router();
 
+// WEB - server side rendering
+router.post("/reset", resetPasswordWeb as RequestHandler);
+router.get("/reset/:token", resetPasswordView as RequestHandler);
+router.get(
+	"/reset/status/reset-success",
+	passwordResetSuccess as RequestHandler,
+);
+router.get(
+	"/reset/status/reset-failure",
+	passwordResetFailure as RequestHandler,
+);
+
+// API
 router.post("/signup", signup as RequestHandler);
 router.post("/login", login as RequestHandler);
 router.get("/:token", verifyEmail as RequestHandler);

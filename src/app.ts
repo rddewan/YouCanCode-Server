@@ -62,6 +62,7 @@ app.set("views", path.join(__dirname, "view"));
 // WEB ROUTES
 app.use("/", homeRouter);
 app.use("/verify-email", authRouter);
+app.use("/password", authRouter);
 
 // API ROUTES
 app.use("/api/v1/auth", authRouter);
