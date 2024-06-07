@@ -59,8 +59,11 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "view"));
 
+// WEB ROUTES
 app.use("/", homeRouter);
 app.use("/verify-email", authRouter);
+
+// API ROUTES
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admin", adminRouter);

@@ -25,6 +25,7 @@ import { RequestHeaders } from "../../../model/types/request-headers";
 import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto";
 import { IFirebaseSocialLoginDto } from "../../dtos/firebase-solical-login.dto";
 import admin from "firebase-admin";
+import { IPasswordResetDto } from "../../dtos/password-reset.dto";
 
 type verifyFunction = (
 	token: string,
@@ -490,7 +491,7 @@ export const forgotPasword = catchAsync(
 		// host is localhost:3000 - mobileacademy.io
 		const host = req.get("host");
 		// create a verify email url
-		const passwordResetUrl = `${protocol}://${host}/api/v1/auth/reset-password/${resetToken}`;
+		const passwordResetUrl = `${protocol}://${host}/reset-password/${resetToken}`;
 
 		try {
 			// send the verify email
@@ -565,6 +566,50 @@ export const resetPassword = catchAsync(
 				passwordRest: true,
 			},
 		});
+	},
+);
+
+export const resetPasswordWeb = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IPasswordResetDto
+		>,
+		res: Response,
+	): Promise<void> => {
+		const resetToken = req.body.token;
+		if (!resetToken) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(resetToken)
+			.digest("hex");
+
+		const user: IUser | null = await User.findOne({
+			passwordResetToken: hashedToken,
+			passwordResetExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		user.password = req.body.password;
+		user.passwordConfirm = req.body.passwordConfirm;
+		// clear the password reset token and expires
+		user.passwordResetToken = undefined;
+		user.passwordResetExpires = undefined;
+		// save the new password to DB
+		await user.save();
+
+		res.render("page/passwordReset/success");
 	},
 );
 
