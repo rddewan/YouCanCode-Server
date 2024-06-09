@@ -55,3 +55,15 @@ curl --location --request POST 'https://identitytoolkit.googleapis.com/v1/accoun
 "password": "sdfdsd3425gtewtw4234324",
 "returnSecureToken": true
 }'
+
+## Docker Command
+
+-   `docker docker images`
+-   `docker build -t youcancode:v0.0.1-Dev .`
+-   `docker build --platform linux/amd64 -t youcancode:v0.0.1-Dev .`
+-   `docker run -p 3000:3000 youcancode:v0.0.1-Dev`
+-   `docker ps -a` - list all the containers
+-   `docker ps` - list the currently running container
+-   `docker login` - login to docker hub account
+-   `docker tag youcancode:v0.0.1-Dev rddewan/youcancode:v0.0.1-Dev`
+-   `docker push rddewan/youcancode:v0.0.1-Dev`
