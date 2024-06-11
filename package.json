@@ -12,7 +12,7 @@
 		"build": "tsc",
 		"dev": "nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm  ./src/server.ts",
 		"format": "prettier --write .",
-		"prepare": "husky install",
+		"prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install; fi",
 		"lint": "eslint . --fix"
 	},
 	"author": "MobileAcademy",
