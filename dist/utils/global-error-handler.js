@@ -1,5 +1,5 @@
 //import { NextFunction } from "express-serve-static-core";
-import HttpStatusCode from "../utils/http-status-code";
+import HttpStatusCode from "../utils/http-status-code.js";
 const sendErrorDev = (err, req, res) => {
 	err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;
 	err.status = err.status || "error";

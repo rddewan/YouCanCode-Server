@@ -6,8 +6,8 @@ import {
 	PutObjectCommandInput,
 	S3Client,
 } from "@aws-sdk/client-s3";
-import AppError from "../app-error";
-import HttpStatusCode from "../http-status-code";
+import AppError from "../app-error.js";
+import HttpStatusCode from "../http-status-code.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 class AwsS3Helper {

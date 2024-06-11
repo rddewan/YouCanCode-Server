@@ -1,6 +1,6 @@
 import nodemailerSendgrid from "nodemailer-sendgrid";
 import modemailer, { TransportOptions } from "nodemailer";
-import { IUser } from "../model/user-model";
+import { IUser } from "../model/user-model.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ejs from "ejs";

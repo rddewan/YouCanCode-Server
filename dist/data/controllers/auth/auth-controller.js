@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
-import User, { AuthType } from "../../../model/user-model";
-import Email from "../../../utils/email";
+import User, { AuthType } from "../../../model/user-model.js";
+import Email from "../../../utils/email.js";
 import crypto from "crypto";
-import catchAsync from "../../../utils/catch-async";
-import AppError from "../../../utils/app-error";
-import HttpStatusCode from "../../../utils/http-status-code";
-import RefreshToken from "../../../model/refresh-token-model";
+import catchAsync from "../../../utils/catch-async.js";
+import AppError from "../../../utils/app-error.js";
+import HttpStatusCode from "../../../utils/http-status-code.js";
+import RefreshToken from "../../../model/refresh-token-model.js";
 import { promisify } from "util";
 import admin from "firebase-admin";
 /**

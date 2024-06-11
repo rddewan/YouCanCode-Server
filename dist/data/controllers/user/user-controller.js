@@ -1,10 +1,10 @@
-import catchAsync from "../../../utils/catch-async";
-import User from "../../../model/user-model";
-import AppError from "../../../utils/app-error";
-import HttpStatusCode from "../../../utils/http-status-code";
+import catchAsync from "../../../utils/catch-async.js";
+import User from "../../../model/user-model.js";
+import AppError from "../../../utils/app-error.js";
+import HttpStatusCode from "../../../utils/http-status-code.js";
 import multer from "multer";
 import sharp from "sharp";
-import AwsS3Helper from "../../../utils/class/aws-s3-helper";
+import AwsS3Helper from "../../../utils/class/aws-s3-helper.js";
 /**
  * Filters the uploaded file to ensure it is an image.
  *

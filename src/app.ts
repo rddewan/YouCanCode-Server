@@ -1,11 +1,11 @@
 import express, { NextFunction, Request, Response } from "express";
-import userRouter from "./route/user-routes";
-import authRouter from "./route/auth-routes";
-import adminRouter from "./route/admin-routes";
-import homeRouter from "./route/home-routes";
-import AppError from "./utils/app-error";
-import globalErrorHandler from "./utils/global-error-handler";
-import HttpStatusCode from "./utils/http-status-code";
+import userRouter from "./route/user-routes.js";
+import authRouter from "./route/auth-routes.js";
+import adminRouter from "./route/admin-routes.js";
+import homeRouter from "./route/home-routes.js";
+import AppError from "./utils/app-error.js";
+import globalErrorHandler from "./utils/global-error-handler.js";
+import HttpStatusCode from "./utils/http-status-code.js";
 import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
 import path from "path";

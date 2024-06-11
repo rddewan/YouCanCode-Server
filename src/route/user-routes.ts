@@ -7,8 +7,8 @@ import {
 	updateMe,
 	updateProfilePhtoto,
 	uploadImage,
-} from "../data/controllers/user/user-controller";
-import { protect } from "../data/controllers/auth/auth-controller";
+} from "../data/controllers/user/user-controller.js";
+import { protect } from "../data/controllers/auth/auth-controller.js";
 
 const router = Router();
 

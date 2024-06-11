@@ -6,26 +6,26 @@ import {
 	Response,
 } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { IUserDto } from "../../dtos/user.dto";
-import User, { AuthType, IUser } from "../../../model/user-model";
-import { UserReponse } from "../../../model/types/user-response";
-import Email from "../../../utils/email";
+import { IUserDto } from "../../dtos/user.dto.js";
+import User, { AuthType, IUser } from "../../../model/user-model.js";
+import { UserReponse } from "../../../model/types/user-response.js";
+import Email from "../../../utils/email.js";
 import crypto from "crypto";
-import catchAsync from "../../../utils/catch-async";
-import AppError from "../../../utils/app-error";
-import HttpStatusCode from "../../../utils/http-status-code";
-import { ILoginDto } from "../../dtos/login.dto";
+import catchAsync from "../../../utils/catch-async.js";
+import AppError from "../../../utils/app-error.js";
+import HttpStatusCode from "../../../utils/http-status-code.js";
+import { ILoginDto } from "../../dtos/login.dto.js";
 import RefreshToken, {
 	IRefreshToken,
-} from "../../../model/refresh-token-model";
+} from "../../../model/refresh-token-model.js";
 import { promisify } from "util";
-import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body";
-import { RequestCookies } from "../../../model/types/request-cookies";
-import { RequestHeaders } from "../../../model/types/request-headers";
-import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto";
-import { IFirebaseSocialLoginDto } from "../../dtos/firebase-solical-login.dto";
+import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body.js";
+import { RequestCookies } from "../../../model/types/request-cookies.js";
+import { RequestHeaders } from "../../../model/types/request-headers.js";
+import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto.js";
+import { IFirebaseSocialLoginDto } from "../../dtos/firebase-solical-login.dto.js";
 import admin from "firebase-admin";
-import { IPasswordResetDto } from "../../dtos/password-reset.dto";
+import { IPasswordResetDto } from "../../dtos/password-reset.dto.js";
 
 type verifyFunction = (
 	token: string,
@@ -661,7 +661,8 @@ export const updatePassword = catchAsync(
 		res: Response,
 		next: NextFunction,
 	): Promise<void> => {
-		const user: IUser | null = await User.findById(req.user?.id).select(
+		const reqUser = req.user;
+		const user: IUser | null = await User.findById(reqUser.id).select(
 			"+password",
 		);
 		if (!user) {
@@ -709,7 +710,8 @@ export const updatePassword = catchAsync(
 export const restrict =
 	(...roles: string[]): RequestHandler =>
 	(req: Request, res: Response, next: NextFunction) => {
-		if (!roles.includes(req.user?.role)) {
+		const reqUser = req.user;
+		if (!roles.includes(reqUser.role)) {
 			return next(
 				new AppError(
 					"You do not have permission to perform this action",

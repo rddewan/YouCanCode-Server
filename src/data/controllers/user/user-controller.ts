@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
-import catchAsync from "../../../utils/catch-async";
-import User, { IUser } from "../../../model/user-model";
-import AppError from "../../../utils/app-error";
-import HttpStatusCode from "../../../utils/http-status-code";
+import { NextFunction, Response } from "express";
+import { Request } from "express-serve-static-core";
+import catchAsync from "../../../utils/catch-async.js";
+import User, { IUser } from "../../../model/user-model.js";
+import AppError from "../../../utils/app-error.js";
+import HttpStatusCode from "../../../utils/http-status-code.js";
 import multer, { FileFilterCallback } from "multer";
 import sharp from "sharp";
-import AwsS3Helper from "../../../utils/class/aws-s3-helper";
-import { IUpdateMeDto } from "../../dtos/update-me.dto";
+import AwsS3Helper from "../../../utils/class/aws-s3-helper.js";
+import { IUpdateMeDto } from "../../dtos/update-me.dto.js";
 
 /**
  * Filters the uploaded file to ensure it is an image.
@@ -70,7 +71,8 @@ export const resizeProfileImage = catchAsync(
 			return next();
 		}
 		// set the file name
-		req.file.filename = `user-${req.user.id}.jpeg`;
+		const reqUser = req.user;
+		req.file.filename = `user-${reqUser.id}.jpeg`;
 
 		// resize the image and send as the buffer to the next middleware
 		const buffer = await processImage(req.file.buffer);
@@ -83,7 +85,8 @@ export const resizeProfileImage = catchAsync(
 
 export const me = catchAsync(
 	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-		const user: IUser | null = await User.findById(req.user.id);
+		const reqUser = req.user;
+		const user: IUser | null = await User.findById(reqUser.id);
 
 		if (!user) {
 			return next(
@@ -129,8 +132,9 @@ export const updateProfilePhtoto = catchAsync(
 		);
 
 		// update the user profile photo
+		const reqUser = req.user;
 		const user: IUser | null = await User.findByIdAndUpdate(
-			req.user.id,
+			reqUser.id,
 			{ photo: fileName },
 			{ new: true, runValidators: true },
 		);
@@ -162,8 +166,9 @@ export const updateMe = catchAsync(
 			);
 		}
 		// find the user by id and update name
+		const reqUser = req.user;
 		const user: IUser | null = await User.findByIdAndUpdate(
-			req.user.id,
+			reqUser.id,
 			req.body,
 			{ new: true, runValidators: true },
 		);
@@ -180,7 +185,8 @@ export const updateMe = catchAsync(
 export const deleteMe = catchAsync(
 	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		// find the user by id and delete
-		const user: IUser | null = await User.findByIdAndDelete(req.user.id);
+		const reqUser = req.user;
+		const user: IUser | null = await User.findByIdAndDelete(reqUser.id);
 		// if no user is found then return error
 		if (!user) {
 			return next(
@@ -202,7 +208,9 @@ export const deleteMe = catchAsync(
 export const disableMe = catchAsync(
 	async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		// find the user by id and update - set the active status to false
-		const user: IUser | null = await User.findByIdAndUpdate(req.user.id, {
+		const reqUser: IUser = req.user;
+
+		const user: IUser | null = await User.findByIdAndUpdate(reqUser.id, {
 			active: false,
 		});
 		// if no user is found then return error

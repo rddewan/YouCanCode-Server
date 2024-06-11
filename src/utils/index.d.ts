@@ -1,4 +1,6 @@
 import { IUser } from "../model/user-model";
+// import { Request } from "express-serve-static-core";
+// import { Express } from "express-serve-static-core";
 
 /**
  * declare global: This line is saying that you want to extend a global, built-in object.

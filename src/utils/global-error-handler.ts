@@ -1,6 +1,6 @@
 //import { NextFunction } from "express-serve-static-core";
-import HttpStatusCode from "../utils/http-status-code";
-import AppError from "./app-error";
+import HttpStatusCode from "../utils/http-status-code.js";
+import AppError from "./app-error.js";
 import { NextFunction, Request, Response } from "express";
 
 const sendErrorDev = (err: AppError, req: Request, res: Response) => {

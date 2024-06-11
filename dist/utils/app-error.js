@@ -1,4 +1,7 @@
 class AppError extends Error {
+	statusCode;
+	status;
+	isOperational;
 	/**
 	 * Creates a new instance of the AppError class.
 	 *

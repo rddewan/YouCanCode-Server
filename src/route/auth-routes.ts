@@ -14,7 +14,7 @@ import {
 	signup,
 	updatePassword,
 	verifyEmail,
-} from "../data/controllers/auth/auth-controller";
+} from "../data/controllers/auth/auth-controller.js";
 
 const router = Router();
 

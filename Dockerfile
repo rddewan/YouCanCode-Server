@@ -139,11 +139,11 @@ COPY src/view ./src/view
 COPY --from=development /usr/src/app/dist ./dist
 
 # expose port 3000 to tell Docker that the container listens on the specified network ports at runtime
-EXPOSE 5000
+EXPOSE 2000
 
 # command to run the app
 # using JSON array syntax (CMD [ "npm", "run", "dev" ]) can be more efficient and secure 
 # because it avoids potential issues with shell interpretation. 
 # If you need shell features or want to take advantage of environment variable expansion, 
 # you can use the form without JSON array syntax (CMD npm run dev).
-CMD ["npm", "dist/server.js"]
+CMD ["node", "dist/server.js"]
