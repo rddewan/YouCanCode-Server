@@ -58,7 +58,8 @@ export const resizeProfileImage = catchAsync(async (req, res, next) => {
 		return next();
 	}
 	// set the file name
-	req.file.filename = `user-${req.user.id}.jpeg`;
+	const reqUser = req.user;
+	req.file.filename = `user-${reqUser.id}.jpeg`;
 	// resize the image and send as the buffer to the next middleware
 	const buffer = await processImage(req.file.buffer);
 	// Override the original buffer with the processed buffer
@@ -66,7 +67,8 @@ export const resizeProfileImage = catchAsync(async (req, res, next) => {
 	next();
 });
 export const me = catchAsync(async (req, res, next) => {
-	const user = await User.findById(req.user.id);
+	const reqUser = req.user;
+	const user = await User.findById(reqUser.id);
 	if (!user) {
 		return next(new AppError("User not found", HttpStatusCode.NOT_FOUND));
 	}
@@ -99,8 +101,9 @@ export const updateProfilePhtoto = catchAsync(async (req, res, next) => {
 		3600,
 	);
 	// update the user profile photo
+	const reqUser = req.user;
 	const user = await User.findByIdAndUpdate(
-		req.user.id,
+		reqUser.id,
 		{ photo: fileName },
 		{ new: true, runValidators: true },
 	);
@@ -120,7 +123,8 @@ export const updateMe = catchAsync(async (req, res, next) => {
 		);
 	}
 	// find the user by id and update name
-	const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+	const reqUser = req.user;
+	const user = await User.findByIdAndUpdate(reqUser.id, req.body, {
 		new: true,
 		runValidators: true,
 	});
@@ -133,7 +137,8 @@ export const updateMe = catchAsync(async (req, res, next) => {
 });
 export const deleteMe = catchAsync(async (req, res, next) => {
 	// find the user by id and delete
-	const user = await User.findByIdAndDelete(req.user.id);
+	const reqUser = req.user;
+	const user = await User.findByIdAndDelete(reqUser.id);
 	// if no user is found then return error
 	if (!user) {
 		return next(new AppError("User not found", HttpStatusCode.NOT_FOUND));
@@ -150,7 +155,8 @@ export const deleteMe = catchAsync(async (req, res, next) => {
 });
 export const disableMe = catchAsync(async (req, res, next) => {
 	// find the user by id and update - set the active status to false
-	const user = await User.findByIdAndUpdate(req.user.id, {
+	const reqUser = req.user;
+	const user = await User.findByIdAndUpdate(reqUser.id, {
 		active: false,
 	});
 	// if no user is found then return error

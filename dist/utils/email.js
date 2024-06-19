@@ -6,18 +6,12 @@ import ejs from "ejs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 export default class Email {
-	to;
-	firstName;
-	url;
-	from;
-	subject;
-	expiresIn;
 	constructor(user, url, expiresIn) {
 		(this.to = user.email), (this.firstName = user.name.split("")[0]);
 		this.url = url;
 		this.from =
 			process.env.EMAIL_FROM ||
-			"Richard Dewan <richard@mobileacademt.io>";
+			"Richard Dewan <richard@mobileacademy.io>";
 		this.expiresIn = expiresIn;
 	}
 	createNewTransport() {

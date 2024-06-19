@@ -34,6 +34,8 @@
 -   npm i multer
 -   npm i --save-dev @types/multer
 -   npm i --include=optional sharp
+-   npm install --cpu=x64 --os=linux --libc=musl sharp (https://sharp.pixelplumbing.com/install#cross-platform)
+-   npm i -D rimraf
 
 ### Setup and configure TypeScript
 
@@ -67,3 +69,19 @@ curl --location --request POST 'https://identitytoolkit.googleapis.com/v1/accoun
 -   `docker login` - login to docker hub account
 -   `docker tag youcancode:v0.0.1-Dev rddewan/youcancode:v0.0.1-Dev`
 -   `docker push rddewan/youcancode:v0.0.1-Dev`
+-   ` docker compose -f docker-compose.dev.yaml up --build`
+-   ` docker compose -f docker-compose.dev.yaml up`
+-   ` docker compose up --build`
+-   ` docker compose up`
+
+## GCloud Command
+
+-   https://cloud.google.com/sdk/docs/install
+-   gcloud auth login
+-   gcloud auth configure-docker
+-   gcloud projects list
+-   gcloud config set project PROJECT_ID
+-   docker tag [IMAGE-NAME]:[TAG] gcr.io/[PROJECT-ID]/[IMAGE-NAME]:[TAG]
+    -   `docker tag youcancode:v0.0.1-RELEASE gcr.io/youcancode-prod-426408/youcancode:v0.0.1-RELEASE`
+-   docker push gcr.io/[PROJECT-ID]/[IMAGE-NAME]:[TAG]
+    -   `docker push gcr.io/youcancode-prod-426408/youcancode:v0.0.1-RELEASE`

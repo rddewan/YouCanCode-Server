@@ -248,6 +248,8 @@ export const signup = catchAsync(
 			IUserDto
 		>,
 		res: Response<UserReponse>,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		next: NextFunction,
 	): Promise<void> => {
 		const { name, email, password, passwordConfirm } = req.body;
 

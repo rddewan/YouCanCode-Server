@@ -9,7 +9,7 @@
 	},
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "tsc",
+		"build": "rimraf ./dist && tsc && cp -R ./src/view ./dist/",
 		"dev": "nodemon --exec node --no-warnings=ExperimentalWarning --loader ts-node/esm  ./src/server.ts",
 		"format": "prettier --write .",
 		"prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install; fi",
@@ -18,8 +18,8 @@
 	"author": "MobileAcademy",
 	"license": "ISC",
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.583.0",
-		"@aws-sdk/s3-request-presigner": "^3.583.0",
+		"@aws-sdk/client-s3": "^3.598.0",
+		"@aws-sdk/s3-request-presigner": "^3.598.0",
 		"bcryptjs": "^2.4.3",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
@@ -28,8 +28,8 @@
 		"express": "^5.0.0-beta.3",
 		"firebase-admin": "^12.1.1",
 		"jsonwebtoken": "^9.0.2",
-		"mongodb": "^6.6.1",
-		"mongoose": "^8.3.4",
+		"mongodb": "^6.7.0",
+		"mongoose": "^8.4.1",
 		"multer": "^1.4.5-lts.1",
 		"nodemailer": "^6.9.13",
 		"nodemailer-sendgrid": "^1.0.3",
@@ -54,6 +54,7 @@
 		"lint-staged": "^15.2.2",
 		"nodemon": "^3.1.0",
 		"prettier": "3.2.5",
+		"rimraf": "^5.0.7",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.4.5",
 		"typescript-eslint": "^7.8.0"

@@ -9,7 +9,7 @@ type AsyncFunction = (
 const catchAsync =
 	(fn: AsyncFunction) =>
 	(req: Request, res: Response, next: NextFunction) => {
-		fn(req, res, next).catch((err) => next(err));
+		fn(req, res, next).catch(next);
 	};
 
 export default catchAsync;

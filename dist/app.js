@@ -16,24 +16,16 @@ const app = express();
 const corsOptions = {
 	origin: function (origin, callback) {
 		const allowedOrigins = [
+			"http://localhost:2000",
 			"http://localhost:3000",
 			"https://mobileacademy.io",
 			"https://wecancode.in",
 		];
-		if (process.env.NODE_ENV === "development") {
-			/// check if the origin is in the allowedOrigins array
-			if (!origin || allowedOrigins.includes(origin)) {
-				callback(null, true);
-			} else {
-				callback(new Error("Not allowed by CORS"), false);
-			}
+		/// check if the origin is in the allowedOrigins array
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true);
 		} else {
-			// check if the origin is in the allowedOrigins array
-			if (origin && allowedOrigins.includes(origin)) {
-				callback(null, true);
-			} else {
-				callback(new Error("Not allowed by CORS"), false);
-			}
+			callback(new Error("Not allowed by CORS"), false);
 		}
 	},
 	methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

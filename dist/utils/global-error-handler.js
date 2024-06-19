@@ -1,5 +1,9 @@
 //import { NextFunction } from "express-serve-static-core";
 import HttpStatusCode from "../utils/http-status-code.js";
+import mongoose from "mongoose";
+const isMongoDBError = (err) => {
+	return err instanceof mongoose.mongo.MongoError;
+};
 const sendErrorDev = (err, req, res) => {
 	err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;
 	err.status = err.status || "error";
@@ -11,6 +15,18 @@ const sendErrorDev = (err, req, res) => {
 	});
 };
 const sendErrorProd = (err, req, res) => {
+	if (isMongoDBError(err)) {
+		const error = { ...err };
+		if (error.code === 11000) {
+			const keyValue = error.keyValue;
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+			const [key, value] = Object.entries(keyValue)[0];
+			return res.status(HttpStatusCode.CONFLICT).json({
+				status: "fail",
+				message: `Duplicate field key ${key} and value: ${value}. Please use another value!`,
+			});
+		}
+	}
 	if (err.isOperational) {
 		err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;
 		err.status = err.status || "error";

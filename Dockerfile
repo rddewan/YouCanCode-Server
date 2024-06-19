@@ -132,9 +132,6 @@ COPY .env.production .
 # copy the public directory to the working directory
 COPY public ./public
 
-# copy the src/view directory to the working directory ./src/view
-COPY src/view ./src/view
-
 # copy the dist directory from the build stage development to the working directory ./dist
 COPY --from=development /usr/src/app/dist ./dist
 

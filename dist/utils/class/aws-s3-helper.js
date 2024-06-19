@@ -8,8 +8,6 @@ import AppError from "../app-error.js";
 import HttpStatusCode from "../http-status-code.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 class AwsS3Helper {
-	static instance;
-	s3Client;
 	/**
 	 * Constructs a new instance of the class by initializing the S3 client with the provided AWS credentials.
 	 *

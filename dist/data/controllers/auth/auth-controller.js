@@ -175,39 +175,46 @@ export const createNewToken = catchAsync(async (req, res, next) => {
 	}
 	await createAndSendToken(user, res);
 });
-export const signup = catchAsync(async (req, res) => {
-	const { name, email, password, passwordConfirm } = req.body;
-	const newUser = await User.create({
-		name,
-		email,
-		password,
-		passwordConfirm,
-		authType: AuthType.email,
-	});
-	const verifyEmailToken = newUser.createVerifyEmailToken();
-	// save the user - we have updated the user model - verifyEmailToken/verifyEmailExpires
-	await newUser.save({ validateBeforeSave: false });
-	// protocol is http or https
-	const protocol = req.protocol;
-	// host is localhost:3000 - mobileacademy.io
-	const host = req.get("host");
-	// create a verify email url
-	const verifyEmailUrl = `${protocol}://${host}/verify-email/${verifyEmailToken}`;
-	// send the verify email
-	await new Email(newUser, verifyEmailUrl, " 24 hours").sendVerifyEmail();
-	res.status(201).json({
-		status: "success",
-		data: {
-			user: {
-				id: newUser._id,
-				name: newUser.name,
-				email: newUser.email,
-				role: newUser.role,
-				authType: newUser.authType,
+export const signup = catchAsync(
+	async (
+		req,
+		res,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		next,
+	) => {
+		const { name, email, password, passwordConfirm } = req.body;
+		const newUser = await User.create({
+			name,
+			email,
+			password,
+			passwordConfirm,
+			authType: AuthType.email,
+		});
+		const verifyEmailToken = newUser.createVerifyEmailToken();
+		// save the user - we have updated the user model - verifyEmailToken/verifyEmailExpires
+		await newUser.save({ validateBeforeSave: false });
+		// protocol is http or https
+		const protocol = req.protocol;
+		// host is localhost:3000 - mobileacademy.io
+		const host = req.get("host");
+		// create a verify email url
+		const verifyEmailUrl = `${protocol}://${host}/verify-email/${verifyEmailToken}`;
+		// send the verify email
+		await new Email(newUser, verifyEmailUrl, " 24 hours").sendVerifyEmail();
+		res.status(201).json({
+			status: "success",
+			data: {
+				user: {
+					id: newUser._id,
+					name: newUser.name,
+					email: newUser.email,
+					role: newUser.role,
+					authType: newUser.authType,
+				},
 			},
-		},
-	});
-});
+		});
+	},
+);
 // verify email
 export const verifyEmail = catchAsync(async (req, res) => {
 	// check if the token is valid
@@ -463,7 +470,8 @@ export const resetPasswordWeb = catchAsync(async (req, res) => {
 	res.render("page/passwordReset/success");
 });
 export const updatePassword = catchAsync(async (req, res, next) => {
-	const user = await User.findById(req.user?.id).select("+password");
+	const reqUser = req.user;
+	const user = await User.findById(reqUser.id).select("+password");
 	if (!user) {
 		return next(
 			new AppError(
@@ -504,7 +512,8 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 export const restrict =
 	(...roles) =>
 	(req, res, next) => {
-		if (!roles.includes(req.user?.role)) {
+		const reqUser = req.user;
+		if (!roles.includes(reqUser.role)) {
 			return next(
 				new AppError(
 					"You do not have permission to perform this action",
