@@ -1,6 +1,6 @@
 import nodemailerSendgrid from "nodemailer-sendgrid";
 import modemailer, { TransportOptions } from "nodemailer";
-import { IUser } from "../model/user-model";
+import { IUser } from "../model/user-model.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import ejs from "ejs";
@@ -21,7 +21,7 @@ export default class Email {
 		this.url = url;
 		this.from =
 			process.env.EMAIL_FROM ||
-			"Richard Dewan <richard@mobileacademt.io>";
+			"Richard Dewan <richard@mobileacademy.io>";
 		this.expiresIn = expiresIn;
 	}
 
@@ -71,7 +71,6 @@ export default class Email {
 			subject,
 			html: html,
 		};
-
 		await this.createNewTransport().sendMail(mailOptions);
 	}
 

@@ -1,7 +1,17 @@
 //import { NextFunction } from "express-serve-static-core";
-import HttpStatusCode from "../utils/http-status-code";
-import AppError from "./app-error";
+
+import HttpStatusCode from "../utils/http-status-code.js";
+import AppError from "./app-error.js";
 import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
+
+interface ExtendedMonogoError extends mongoose.mongo.MongoError {
+	keyValue?: Record<string, unknown>;
+}
+
+const isMongoDBError = (err: Error): err is ExtendedMonogoError => {
+	return err instanceof mongoose.mongo.MongoError;
+};
 
 const sendErrorDev = (err: AppError, req: Request, res: Response) => {
 	err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;
@@ -16,6 +26,21 @@ const sendErrorDev = (err: AppError, req: Request, res: Response) => {
 };
 
 const sendErrorProd = (err: AppError, req: Request, res: Response) => {
+	if (isMongoDBError(err)) {
+		const error = { ...err };
+		if (error.code === 11000) {
+			const keyValue = error.keyValue;
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			const [key, value] = Object.entries(
+				keyValue as Record<string, unknown>,
+			)[0];
+
+			return res.status(HttpStatusCode.CONFLICT).json({
+				status: "fail",
+				message: `Duplicate field key ${key} and value: ${value as string}. Please use another value!`,
+			});
+		}
+	}
 	if (err.isOperational) {
 		err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;
 		err.status = err.status || "error";

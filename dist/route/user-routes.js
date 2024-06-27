@@ -1,6 +1,26 @@
 import { Router } from "express";
-import { me } from "../data/controllers/user-controller";
+import {
+	deleteMe,
+	disableMe,
+	me,
+	resizeProfileImage,
+	updateMe,
+	updateProfilePhtoto,
+	uploadImage,
+} from "../data/controllers/user/user-controller.js";
+import { protect } from "../data/controllers/auth/auth-controller.js";
 const router = Router();
-router.get("/", me);
+// this will protect all the routes below with this middleware
+router.use(protect);
+router.get("/me", me);
+router.patch(
+	"/update-profile-photo",
+	uploadImage,
+	resizeProfileImage,
+	updateProfilePhtoto,
+);
+router.patch("/update-me", updateMe);
+router.delete("/delete-me", deleteMe);
+router.patch("/disable-me", disableMe);
 export default router;
 //# sourceMappingURL=user-routes.js.map

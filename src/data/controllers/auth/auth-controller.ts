@@ -6,25 +6,26 @@ import {
 	Response,
 } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { IUserDto } from "../../dtos/user.dto";
-import User, { AuthType, IUser } from "../../../model/user-model";
-import { UserReponse } from "../../../model/types/user-response";
-import Email from "../../../utils/email";
+import { IUserDto } from "../../dtos/user.dto.js";
+import User, { AuthType, IUser } from "../../../model/user-model.js";
+import { UserReponse } from "../../../model/types/user-response.js";
+import Email from "../../../utils/email.js";
 import crypto from "crypto";
-import catchAsync from "../../../utils/catch-async";
-import AppError from "../../../utils/app-error";
-import HttpStatusCode from "../../../utils/http-status-code";
-import { ILoginDto } from "../../dtos/login.dto";
+import catchAsync from "../../../utils/catch-async.js";
+import AppError from "../../../utils/app-error.js";
+import HttpStatusCode from "../../../utils/http-status-code.js";
+import { ILoginDto } from "../../dtos/login.dto.js";
 import RefreshToken, {
 	IRefreshToken,
-} from "../../../model/refresh-token-model";
+} from "../../../model/refresh-token-model.js";
 import { promisify } from "util";
-import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body";
-import { RequestCookies } from "../../../model/types/request-cookies";
-import { RequestHeaders } from "../../../model/types/request-headers";
-import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto";
-import { IFirebaseSocialLoginDto } from "../../dtos/firebase-solical-login.dto";
+import { CreateNewTokenRequestBody } from "../../../model/types/create-new-token-rquest-body.js";
+import { RequestCookies } from "../../../model/types/request-cookies.js";
+import { RequestHeaders } from "../../../model/types/request-headers.js";
+import { IUpdatePasswordDto } from "../../dtos/update-passwod.dto.js";
+import { IFirebaseSocialLoginDto } from "../../dtos/firebase-solical-login.dto.js";
 import admin from "firebase-admin";
+import { IPasswordResetDto } from "../../dtos/password-reset.dto.js";
 
 type verifyFunction = (
 	token: string,
@@ -247,6 +248,8 @@ export const signup = catchAsync(
 			IUserDto
 		>,
 		res: Response<UserReponse>,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		next: NextFunction,
 	): Promise<void> => {
 		const { name, email, password, passwordConfirm } = req.body;
 
@@ -266,7 +269,7 @@ export const signup = catchAsync(
 		// host is localhost:3000 - mobileacademy.io
 		const host = req.get("host");
 		// create a verify email url
-		const verifyEmailUrl = `${protocol}://${host}/api/v1/auth/verify-email/${verifyEmailToken}`;
+		const verifyEmailUrl = `${protocol}://${host}/verify-email/${verifyEmailToken}`;
 		// send the verify email
 		await new Email(newUser, verifyEmailUrl, " 24 hours").sendVerifyEmail();
 
@@ -288,9 +291,17 @@ export const signup = catchAsync(
 // verify email
 export const verifyEmail = catchAsync(
 	async (req: Request, res: Response): Promise<void> => {
+		// check if the token is valid
+		const verifyEmailToken = req.params.token;
+		if (!verifyEmailToken) {
+			return res.render("page/verify-email-failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
 		const token = crypto
 			.createHash("sha256")
-			.update(req.params.token)
+			.update(verifyEmailToken)
 			.digest("hex");
 
 		const user: IUser | null = await User.findOne({
@@ -299,7 +310,9 @@ export const verifyEmail = catchAsync(
 		});
 
 		if (!user) {
-			throw new Error("Token is invalid or has expired");
+			return res.render("page/verify-email-failure", {
+				message: "Invalid token or  token has expired",
+			});
 		}
 
 		// protocol is http or https
@@ -316,17 +329,8 @@ export const verifyEmail = catchAsync(
 		// save the user - disable the validateBeforeSave option
 		await user.save({ validateBeforeSave: false });
 
-		res.status(200).json({
-			status: "success",
-			data: {
-				user: {
-					id: user._id as string,
-					name: user.name,
-					email: user.email,
-					role: user.role,
-					authType: user.authType,
-				},
-			},
+		res.render("page/verify-email-success", {
+			message: "Email verified successfully",
 		});
 	},
 );
@@ -363,6 +367,17 @@ export const login = catchAsync(
 				new AppError(
 					"Incorrect email or password",
 					HttpStatusCode.UNAUTHORIZED,
+				),
+			);
+		}
+
+		// check if the user is active
+		if (!user.active) {
+			// 403 (Forbidden): If the user is not active
+			return next(
+				new AppError(
+					"Your account is not active. Please contact the admin",
+					HttpStatusCode.FORBIDDEN,
 				),
 			);
 		}
@@ -478,7 +493,7 @@ export const forgotPasword = catchAsync(
 		// host is localhost:3000 - mobileacademy.io
 		const host = req.get("host");
 		// create a verify email url
-		const passwordResetUrl = `${protocol}://${host}/api/v1/auth/reset-password/${resetToken}`;
+		const passwordResetUrl = `${protocol}://${host}/password/reset/${resetToken}`;
 
 		try {
 			// send the verify email
@@ -556,6 +571,88 @@ export const resetPassword = catchAsync(
 	},
 );
 
+export const resetPasswordView = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IUserDto
+		>,
+		res: Response,
+	): Promise<void> => {
+		const resetToken = req.params.token;
+		if (!resetToken) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(resetToken as string)
+			.digest("hex");
+
+		const user: IUser | null = await User.findOne({
+			passwordResetToken: hashedToken,
+			passwordResetExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		res.render("page/passwordReset/password-reset", {
+			token: resetToken,
+		});
+	},
+);
+
+export const resetPasswordWeb = catchAsync(
+	async (
+		req: Request<
+			Record<string, unknown>,
+			Record<string, unknown>,
+			IPasswordResetDto
+		>,
+		res: Response,
+	): Promise<void> => {
+		const resetToken = req.body.token;
+		if (!resetToken) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(resetToken)
+			.digest("hex");
+
+		const user: IUser | null = await User.findOne({
+			passwordResetToken: hashedToken,
+			passwordResetExpires: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			return res.render("page/passwordReset/failure", {
+				message: "Invalid token or  token has expired",
+			});
+		}
+
+		user.password = req.body.password;
+		user.passwordConfirm = req.body.passwordConfirm;
+		// clear the password reset token and expires
+		user.passwordResetToken = undefined;
+		user.passwordResetExpires = undefined;
+		// save the new password to DB
+		await user.save();
+
+		res.render("page/passwordReset/success");
+	},
+);
+
 export const updatePassword = catchAsync(
 	async (
 		req: Request<
@@ -566,7 +663,8 @@ export const updatePassword = catchAsync(
 		res: Response,
 		next: NextFunction,
 	): Promise<void> => {
-		const user: IUser | null = await User.findById(req.user?.id).select(
+		const reqUser = req.user;
+		const user: IUser | null = await User.findById(reqUser.id).select(
 			"+password",
 		);
 		if (!user) {
@@ -614,7 +712,8 @@ export const updatePassword = catchAsync(
 export const restrict =
 	(...roles: string[]): RequestHandler =>
 	(req: Request, res: Response, next: NextFunction) => {
-		if (!roles.includes(req.user?.role)) {
+		const reqUser = req.user;
+		if (!roles.includes(reqUser.role)) {
 			return next(
 				new AppError(
 					"You do not have permission to perform this action",
@@ -852,4 +951,22 @@ export const firebasePhoneLogin = async (
 			}
 		}
 	}
+};
+
+export const passwordResetSuccess = (req: Request, res: Response): void => {
+	const token = req.query.token as string;
+	if (!token) {
+		return res.render("page/404");
+	}
+
+	res.render("page/passwordReset/success");
+};
+
+export const passwordResetFailure = (req: Request, res: Response): void => {
+	const token = req.query.token as string;
+	if (!token) {
+		return res.render("page/404");
+	}
+
+	res.render("page/passwordReset/failure");
 };

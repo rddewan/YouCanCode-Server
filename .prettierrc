@@ -21,6 +21,13 @@
 				"parser": "markdown",
 				"printWidth": 100
 			}
+		},
+		{
+			"files": "*.yaml",
+			"options": {
+				"parser": "yaml",
+				"tabWidth": 2
+			}
 		}
 	]
 }

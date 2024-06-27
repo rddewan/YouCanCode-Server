@@ -1,0 +1,32 @@
+# This specifies the version of the Docker Compose file syntax being used. In this case, it's version 3.8.
+version: "3.8"
+# This is where you define the services that make up your application. api - database - web
+# In this case, there's only one service named api.
+services:
+    # This defines the service called api.#
+    # This is the name of the service being defined. It will be used to refer to this service within the Docker Compose file.
+    api-dev:
+        # This specifies the Docker image to be used for this service. It's named wecancode and has the tag v0.0.1.DEV.
+        image: youcancode:v0.0.1-DEV
+        # This section is used when you want to build a custom image using a Dockerfile.
+        build:
+            # This specifies the build context, which is the path to the directory containing the Dockerfile.
+            # In this case, it's set to the current directory (.).
+            context: .
+            # This specifies the build target, which is a specific stage in the Dockerfile to build.
+            # In this case, it's set to development.
+            target: development
+        # This section is used to mount volumes into the container.
+        volumes:
+            # This mounts the current directory (denoted by .) into the /usr/src/app directory within the container.
+            - .:/usr/src/app
+            # This mounts the node_modules directory from the host into the container.
+            # This is commonly done to speed up development by avoiding reinstalling dependencies on every container restart.
+            - /user/src/app/node_modules
+        # This section is used to expose ports from the container to the host.
+        ports:
+            # This maps port 8000 on the host to port 8000 on the container.
+            # So any traffic sent to port 8000 on the host will be forwarded to port 8000 on the container.
+            - 3000:3000
+        # This specifies the platform architecture for which the image is built. In this case, it's Linux on AMD64 architecture.
+        platform: linux/amd64

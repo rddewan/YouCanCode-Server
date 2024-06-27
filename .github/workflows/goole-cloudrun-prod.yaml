@@ -1,0 +1,127 @@
+name: YouCanCode API Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ secrets.CLOUD_RUN_PROJECT_ID }}
+  REGION: ${{ secrets.CLOUD_RUN_REGION }}
+  SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+# It runs on an Ubuntu environment (ubuntu-latest) and is associated with the "production" environment.
+jobs:
+  deploy:
+    # Runs on: Ubuntu latest
+    runs-on: ubuntu-latest
+    # Environment: production - we will get the secret for the production environment
+    environment: production
+
+    steps:
+      # Checks out the repository at the commit that triggered the workflow.
+      - name: Checkout
+        uses: actions/checkout@v4
+      # Decodes and writes the contents of a secret named DOT_ENV_FILE as a .env.production file in the workspace.
+      - name: Create .env.production file
+        run: |
+          echo "${{ secrets.DOT_ENV_FILE }}" | base64 --decode > .env.production
+
+      # Downloads and installs the Google Cloud SDK.
+      # Authenticates using a service account key stored in GCP_CREDENTIALS secret.
+      # Sets the Google Cloud project ID for subsequent commands.
+      - name: Set up Google Cloud SDK
+        run: |
+          curl -o google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+          tar -xf google-cloud-sdk.tar.gz
+          ./google-cloud-sdk/install.sh --quiet
+          echo "${{ secrets.GCP_CREDENTIALS }}" | base64 --decode > /tmp/gcloud.json
+          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=/tmp/gcloud.json
+          ./google-cloud-sdk/bin/gcloud config set project ${{ env.PROJECT_ID }}
+
+      # Configures Docker to authenticate with Google Cloud.
+      # Builds a Docker image using docker-compose for development (docker-compose.dev.yaml).
+      # Tags the Docker image with the Google Container Registry (GCR) repository path including the GitHub commit SHA.
+      # Pushes the Docker image to GCR.
+      - name: Configure Docker and push image
+        run: |
+          ./google-cloud-sdk/bin/gcloud auth configure-docker
+          docker-compose build
+          docker tag ${{ github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
+
+      # Deploys the Docker image to Google Cloud Run.
+      # Specifies the image from GCR tagged with the GitHub commit SHA.
+      # Uses the specified Google Cloud Run service (${{ env.SERVICE }}), region (${{ env.REGION }}), and allows unauthenticated access.
+      - name: Deploy to Google Cloud Run
+        run: |
+          ./google-cloud-sdk/bin/gcloud run deploy ${{ env.SERVICE }} \
+            --image=gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }} \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --allow-unauthenticated
+
+      # Cleans up temporary files used during the workflow execution.
+      - name: Post-Deployment Cleanup
+        run: |
+          rm /tmp/gcloud.json
+          rm google-cloud-sdk.tar.gz
+
+  # This job runs after the deploy job completes.
+  alert:
+    needs: deploy # depends on deploy job completion
+    # Runs on: Ubuntu latest
+    runs-on: ubuntu-latest
+    # Environment: production - we will get the secret for the production environment
+    environment: production
+
+    steps:
+      # send slack notification
+      - name: Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
+
+      # send email using Send Grid Server
+      - name: "Send Email"
+        uses: dawidd6/action-send-mail@v3
+        with:
+          # Required mail server address:
+          server_address: smtp.sendgrid.net
+          # Required mail server port:
+          server_port: 465
+          # Optional (recommended): mail server username:
+          username: ${{secrets.MAIL_USERNAME}}
+          # Optional (recommended) mail server password:
+          password: ${{secrets.MAIL_PASSWORD}}
+          # Required mail subject:
+          subject: Github Actions job result
+          # Required recipients' addresses:
+          to: richarddewan@hotmail.com,richardrijudewan@gmail.com
+          # Required sender full name (address can be skipped):
+          from: Richard Dewan <richard@mobileacademy.io>
+          # Optional whether this connection use TLS (default is true if server_port is 465)
+          secure: true
+          # Optional plain body:
+          body: "The GitHub Action completed with status: ${{ job.status }}"
+          # Optional HTML body read from file:
+          html_body:
+          # Optional carbon copy recipients:
+          cc:
+          # Optional blind carbon copy recipients:
+          bcc:
+          # Optional recipient of the email response:
+          reply_to:
+          # Optional unsigned/invalid certificates allowance:
+          ignore_cert:
+          # Optional converting Markdown to HTML (set content_type to text/html too):
+          convert_markdown:
+          # Optional attachments:
+          attachments:

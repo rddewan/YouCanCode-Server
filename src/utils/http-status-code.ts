@@ -8,6 +8,7 @@ const HttpStatusCode = {
 	NOT_FOUND: 404,
 	INTERNAL_SERVER_ERROR: 500,
 	INVALID_TOKEN: 498,
+	CONFLICT: 409,
 };
 
 export default HttpStatusCode;

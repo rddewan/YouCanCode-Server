@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+    api-prod:
+        image: youcancode:v0.0.1-RELEASE
+        build:
+            context: .
+            target: production
+        ports:
+            - 2000:2000
+        platform: linux/amd64
