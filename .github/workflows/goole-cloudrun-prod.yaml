@@ -1,12 +1,12 @@
 name: YouCanCode API Server
-
+# Triggers on push to main branch
 on:
   push:
     branches:
       - main
   pull_request:
     branches: [main]
-
+# Environment variables
 env:
   PROJECT_ID: ${{ secrets.CLOUD_RUN_PROJECT_ID }}
   REGION: ${{ secrets.CLOUD_RUN_REGION }}
@@ -50,7 +50,7 @@ jobs:
         run: |
           ./google-cloud-sdk/bin/gcloud auth configure-docker
           docker-compose build
-          docker tag ${{ github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
+          docker tag youcancode:v0.0.1-RELEASE gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
           docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
 
       # Deploys the Docker image to Google Cloud Run.
