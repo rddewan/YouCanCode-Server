@@ -34,8 +34,10 @@
 -   npm i multer
 -   npm i --save-dev @types/multer
 -   npm i --include=optional sharp
+-   npm install --os=darwin --cpu=arm64 sharp
 -   npm install --cpu=x64 --os=linux --libc=musl sharp (https://sharp.pixelplumbing.com/install#cross-platform)
 -   npm i -D rimraf
+-   npm i express-rate-limit
 
 ### Setup and configure TypeScript
 

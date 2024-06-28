@@ -10,12 +10,46 @@ import cookieParser from "cookie-parser";
 import cors, { CorsOptions } from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import rateLimit from "express-rate-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// global rate limit
+const globalRateLimit = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes - How long to remember requests for, in milliseconds.
+	max: 50, // How many requests to allow.
+	standardHeaders: "draft-7", // Enable the Ratelimit header.
+	legacyHeaders: false,
+	// Function to run after limit is reached (overrides message and statusCode settings, if set).
+	handler: (req: Request, res: Response, next: NextFunction) => {
+		next(
+			new AppError(
+				"Too many requests, please try again later.",
+				HttpStatusCode.TOO_MANY_REQUESTS,
+			),
+		);
+	},
+});
+
+// Auth rate limit
+const authRateLimit = rateLimit({
+	windowMs: 5 * 60 * 1000, // 5 minutes - How long to remember requests for, in milliseconds.
+	max: 3, // How many requests to allow.
+	standardHeaders: "draft-7", // Enable the Ratelimit header.
+	legacyHeaders: false,
+	// Function to run after limit is reached (overrides message and statusCode settings, if set).
+	handler: (req: Request, res: Response, next: NextFunction) => {
+		next(
+			new AppError(
+				"Too many requests, please try again later.",
+				HttpStatusCode.TOO_MANY_REQUESTS,
+			),
+		);
+	},
+});
 const corsOptions: CorsOptions = {
 	origin: function (
 		origin: string | undefined,
@@ -38,6 +72,9 @@ const corsOptions: CorsOptions = {
 	methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 	credentials: true,
 };
+
+// middleware to enable the rate limit
+app.use(globalRateLimit);
 // middleware to enable the cors
 app.use(cors(corsOptions));
 // middleware to parse the cookies
@@ -57,7 +94,7 @@ app.use("/verify-email", authRouter);
 app.use("/password", authRouter);
 
 // API ROUTES
-app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/auth", authRateLimit, authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admin", adminRouter);
 
