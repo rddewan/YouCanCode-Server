@@ -11,6 +11,7 @@ import cors, { CorsOptions } from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,6 +74,8 @@ const corsOptions: CorsOptions = {
 	credentials: true,
 };
 
+// middlerware to enable the helmet
+app.use(helmet());
 // middleware to enable the rate limit
 app.use(globalRateLimit);
 // middleware to enable the cors

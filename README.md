@@ -38,6 +38,7 @@
 -   npm install --cpu=x64 --os=linux --libc=musl sharp (https://sharp.pixelplumbing.com/install#cross-platform)
 -   npm i -D rimraf
 -   npm i express-rate-limit
+-   npm install helmet --save
 
 ### Setup and configure TypeScript
 
