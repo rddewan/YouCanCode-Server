@@ -12,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -84,6 +85,8 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 // middleware to parse the json
 app.use(express.json());
+// middleware to sanitize the data
+app.use(mongoSanitize());
 
 // middleware to serve static files  from public folder
 app.use(express.static("public"));

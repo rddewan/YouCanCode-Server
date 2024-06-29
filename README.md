@@ -39,6 +39,7 @@
 -   npm i -D rimraf
 -   npm i express-rate-limit
 -   npm install helmet --save
+-   npm install express-mongo-sanitize
 
 ### Setup and configure TypeScript
 
