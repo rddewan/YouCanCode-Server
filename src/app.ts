@@ -84,7 +84,7 @@ app.use(cors(corsOptions));
 // middleware to parse the cookies
 app.use(cookieParser());
 // middleware to parse the json
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 // middleware to sanitize the data
 app.use(mongoSanitize());
 
